@@ -5,7 +5,12 @@
   "license": "MIT",
   "author": "Isak Weckstén <ij222pv@student.lnu.se>",
   "type": "module",
-  "main": "src/index.js",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
   "scripts": {
+    "build": "tsc"
+  },
+  "dependencies": {
+    "typescript": "^5.9.2"
   }
 }
