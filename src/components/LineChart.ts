@@ -1,10 +1,16 @@
 import template from "./LineChart.html.js";
+import type Renderer from "../renderers/Renderer.js";
+import RendererFactoryImpl from "../renderers/RendererFactoryImpl.js";
+import LineChartState from "../states/LineChartState.js";
+import type Point from "../utils/Point.js";
 
 const TAG_NAME = "line-chart";
 
 export default class LineChart extends HTMLElement {
   private chart: HTMLCanvasElement | null = null;
   private renderingContext: CanvasRenderingContext2D | null = null;
+  private state = new LineChartState();
+  private renderer: Renderer | null = null;
 
   constructor() {
     super();
@@ -12,6 +18,9 @@ export default class LineChart extends HTMLElement {
     this.attachShadow({ mode: "open" }).appendChild(
       template.content.cloneNode(true),
     );
+
+    const rendererFactory = new RendererFactoryImpl();
+    this.renderer = rendererFactory.makeRenderer(this.state);
   }
 
   async connectedCallback(): Promise<void> {
@@ -19,7 +28,13 @@ export default class LineChart extends HTMLElement {
 
     if (!this.chart) return;
 
+    this.state.pixelWidth = this.chart.width;
+    this.state.pixelHeight = this.chart.height;
     this.renderingContext = this.chart.getContext("2d");
+
+    if (!this.renderingContext) return;
+
+    this.renderer?.render(this.renderingContext, this.state);
   }
 
   disconnectedCallback(): void {
@@ -34,6 +49,10 @@ export default class LineChart extends HTMLElement {
 
   static get observedAttributes(): string[] {
     return [];
+  }
+
+  public setPoints(points: Point[]) {
+    this.state.setPoints(points);
   }
 }
 
