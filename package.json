@@ -1,0 +1,11 @@
+{
+  "name": "l2",
+  "version": "0.0.0",
+  "description": "",
+  "license": "MIT",
+  "author": "Isak Weckstén <ij222pv@student.lnu.se>",
+  "type": "module",
+  "main": "src/index.js",
+  "scripts": {
+  }
+}
