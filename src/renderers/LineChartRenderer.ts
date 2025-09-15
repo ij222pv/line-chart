@@ -6,11 +6,22 @@ import type Renderer from "./Renderer";
 
 export default class LineChartRenderer implements Renderer {
   render(renderingContext: CanvasRenderingContext2D, chartState: LineChartState): void {
+    this.clear(renderingContext);
+    this.drawOutline(renderingContext, chartState);
+    this.drawLine(renderingContext, chartState);
+  }
+
+  private clear(renderingContext: CanvasRenderingContext2D): void {
+    renderingContext.clearRect(0, 0, renderingContext.canvas.width, renderingContext.canvas.height);
+  }
+
+  private drawOutline(renderingContext: CanvasRenderingContext2D, chartState: LineChartState): void {
     renderingContext.rect(0, 0, chartState.pixelWidth, chartState.pixelHeight);
     renderingContext.stroke();
+  }
 
+  private drawLine(renderingContext: CanvasRenderingContext2D, chartState: LineChartState): void {
     const boundary: Rectangle = chartState.getBoundary();
-
     const rectangleMapper = new RectangleMapper(boundary, new Rectangle(new Point(0, 0), new Point(chartState.pixelWidth, chartState.pixelHeight)));
 
     renderingContext.beginPath();
