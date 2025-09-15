@@ -9,11 +9,11 @@ export default class Rectangle {
     this.bottomRight = bottomRightPoint;
   }
 
-  get topLeft() {
+  get topLeft(): Point {
     return this._topLeft;
   }
 
-  get bottomRight() {
+  get bottomRight(): Point {
     return this._bottomRight;
   }
 
@@ -27,11 +27,11 @@ export default class Rectangle {
     this._bottomRight = point;
   }
 
-  get width() {
+  get width(): number {
     return this.bottomRight.x - this.topLeft.x;
   }
 
-  get height() {
+  get height(): number {
     return this.bottomRight.y - this.topLeft.y;
   }
 
