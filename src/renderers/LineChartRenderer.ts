@@ -4,11 +4,14 @@ import Rectangle from "../utils/Rectangle";
 import RectangleMapper from "../utils/RectangleMapper";
 import type Renderer from "./Renderer";
 
+const MARGIN = 25;
+
 export default class LineChartRenderer implements Renderer {
   render(renderingContext: CanvasRenderingContext2D, chartState: LineChartState): void {
     this.clear(renderingContext);
     this.drawOutline(renderingContext, chartState);
     this.drawLine(renderingContext, chartState);
+    this.drawScale(renderingContext, chartState);
   }
 
   private clear(renderingContext: CanvasRenderingContext2D): void {
@@ -17,12 +20,13 @@ export default class LineChartRenderer implements Renderer {
 
   private drawOutline(renderingContext: CanvasRenderingContext2D, chartState: LineChartState): void {
     renderingContext.rect(0, 0, chartState.pixelWidth, chartState.pixelHeight);
+    renderingContext.rect(MARGIN, 0, chartState.pixelWidth - MARGIN, chartState.pixelHeight - MARGIN);
     renderingContext.stroke();
   }
 
   private drawLine(renderingContext: CanvasRenderingContext2D, chartState: LineChartState): void {
     const boundary: Rectangle = chartState.getBoundary();
-    const rectangleMapper = new RectangleMapper(boundary, new Rectangle(new Point(0, 0), new Point(chartState.pixelWidth, chartState.pixelHeight)));
+    const rectangleMapper = new RectangleMapper(boundary, new Rectangle(new Point(MARGIN, 0), new Point(chartState.pixelWidth, chartState.pixelHeight - MARGIN)));
 
     renderingContext.beginPath();
     for(const point of chartState.points) {
@@ -30,5 +34,27 @@ export default class LineChartRenderer implements Renderer {
       renderingContext.lineTo(mappedPoint.x, mappedPoint.y);
     }
     renderingContext.stroke();
+  }
+
+  private drawScale(renderingContext: CanvasRenderingContext2D, chartState: LineChartState): void {
+    const boundary: Rectangle = chartState.getBoundary();
+    const rectangleMapper = new RectangleMapper(boundary, new Rectangle(new Point(MARGIN, 0), new Point(chartState.pixelWidth, chartState.pixelHeight - MARGIN)));
+
+    renderingContext.fillStyle = "black";
+    renderingContext.font = "12px Arial";
+    renderingContext.textAlign = "center";
+    renderingContext.textBaseline = "middle";
+
+    const stepSize = 1;
+    for(let i = 0; i <= boundary.bottomRight.x - boundary.topLeft.x; i+=stepSize) {
+      const xValue = boundary.topLeft.x + i;
+      const mappedX = rectangleMapper.map(new Point(xValue, 0)).x;
+
+      renderingContext.fillText(xValue.toString(), mappedX, chartState.pixelHeight - MARGIN / 2);
+      renderingContext.beginPath();
+      renderingContext.moveTo(mappedX, chartState.pixelHeight - MARGIN);
+      renderingContext.lineTo(mappedX, chartState.pixelHeight - MARGIN * 3 / 4);
+      renderingContext.stroke();
+    }
   }
 }
