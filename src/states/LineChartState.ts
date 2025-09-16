@@ -13,6 +13,9 @@ export default class LineChartState extends ChartState {
     }
   }
 
+  /**
+   * Set the points in the line chart to render.
+   */
   public setPoints(points: Point[]): void {
     for(const point of points) {
       if(!(point instanceof Point)) {
@@ -31,10 +34,17 @@ export default class LineChartState extends ChartState {
     this._points = sortedPoints;
   }
 
+  /**
+   * Get a copy of the points in the line chart.
+   */
   get points(): Point[] {
     return Array.from(this._points);
   }
 
+  /**
+   * Finds and returns the boundary rectangle enclosing all points in the line chart.
+   * @returns A rectangle completely enclosing all points in the line chart.
+   */
   public getBoundary(): Rectangle {
     const topLeft = new Point(Infinity, Infinity);
     const bottomRight = new Point(-Infinity, -Infinity);

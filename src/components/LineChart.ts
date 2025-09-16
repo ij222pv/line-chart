@@ -23,6 +23,9 @@ export default class LineChart extends HTMLElement {
     this.renderer = rendererFactory.makeRenderer(this.state);
   }
 
+  /**
+   * Handle the element being added to the DOM.
+   */
   async connectedCallback(): Promise<void> {
     this.chart = this.shadowRoot!.querySelector("#chart") ?? null;
 
@@ -37,20 +40,32 @@ export default class LineChart extends HTMLElement {
     this.renderer?.render(this.renderingContext, this.state);
   }
 
+  /**
+   * Handle the element being removed from the DOM.
+   */
   disconnectedCallback(): void {
 
   }
 
+  /**
+   * Handle attribute changes.
+   */
   attributeChangedCallback(_name: string, oldValue: string, newValue: string): void {
     if (oldValue === newValue) {
       return;
     }
   }
 
+  /**
+   * A list of attributes for the custom element.
+   */
   static get observedAttributes(): string[] {
     return [];
   }
 
+  /**
+   * Define the points in the line chart.
+   */
   public setPoints(points: Point[]) {
     this.state.setPoints(points);
   }
