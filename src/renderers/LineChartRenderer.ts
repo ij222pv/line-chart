@@ -36,7 +36,7 @@ export default class LineChartRenderer implements Renderer {
    */
   private drawLine(renderingContext: CanvasRenderingContext2D, chartState: LineChartState): void {
     const boundary: Rectangle = chartState.getBoundary();
-    const rectangleMapper = new RectangleMapper(boundary, new Rectangle(new Point(MARGIN, 0), new Point(chartState.pixelWidth, chartState.pixelHeight - MARGIN)));
+    const rectangleMapper = new RectangleMapper(boundary, new Rectangle(new Point(MARGIN + chartState.padding, chartState.padding), new Point(chartState.pixelWidth - chartState.padding, chartState.pixelHeight - MARGIN - chartState.padding)));
 
     renderingContext.beginPath();
     for(const point of chartState.points) {
@@ -51,7 +51,7 @@ export default class LineChartRenderer implements Renderer {
    */
   private drawScale(renderingContext: CanvasRenderingContext2D, chartState: LineChartState): void {
     const boundary: Rectangle = chartState.getBoundary();
-    const rectangleMapper = new RectangleMapper(boundary, new Rectangle(new Point(MARGIN, 0), new Point(chartState.pixelWidth, chartState.pixelHeight - MARGIN)));
+    const rectangleMapper = new RectangleMapper(boundary, new Rectangle(new Point(MARGIN + chartState.padding, chartState.padding), new Point(chartState.pixelWidth - chartState.padding, chartState.pixelHeight - MARGIN - chartState.padding)));
 
     renderingContext.fillStyle = "black";
     renderingContext.font = "12px Arial";

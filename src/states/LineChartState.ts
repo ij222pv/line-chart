@@ -5,6 +5,7 @@ import ChartState from "./ChartState";
 export default class LineChartState extends ChartState {
   private _points: Point[] = [];
   private _scaleInterval: number = 1;
+  private _padding: number = 25;
 
   constructor(points?: Point[]) {
     super();
@@ -70,5 +71,9 @@ export default class LineChartState extends ChartState {
 
   public get scaleInterval(): number {
     return this._scaleInterval;
+  }
+
+  public get padding(): number {
+    return this._padding;
   }
 }
