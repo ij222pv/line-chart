@@ -59,14 +59,23 @@ export default class LineChartRenderer implements Renderer {
     renderingContext.textBaseline = "middle";
 
     const stepSize = chartState.scaleInterval;
-    for(let i = 0; i <= boundary.bottomRight.x - boundary.topLeft.x; i+=stepSize) {
-      const xValue = boundary.topLeft.x + i;
+    for(let xValue = boundary.topLeft.x; xValue <= boundary.bottomRight.x; xValue+=stepSize) {
       const mappedX = rectangleMapper.map(new Point(xValue, 0)).x;
 
-      renderingContext.fillText(xValue.toString(), mappedX, chartState.pixelHeight - MARGIN / 2);
+      renderingContext.fillText(xValue.toFixed(1), mappedX, chartState.pixelHeight - MARGIN / 2);
       renderingContext.beginPath();
       renderingContext.moveTo(mappedX, chartState.pixelHeight - MARGIN);
       renderingContext.lineTo(mappedX, chartState.pixelHeight - MARGIN * 3 / 4);
+      renderingContext.stroke();
+    }
+
+    for(let yValue = boundary.bottomRight.y; yValue <= boundary.topLeft.y; yValue+=stepSize) {
+      const mappedY = rectangleMapper.map(new Point(0, yValue)).y;
+      
+      renderingContext.fillText(yValue.toFixed(1), MARGIN / 2, mappedY);
+      renderingContext.beginPath();
+      renderingContext.moveTo(MARGIN, mappedY);
+      renderingContext.lineTo(MARGIN * 3 / 4, mappedY);
       renderingContext.stroke();
     }
   }

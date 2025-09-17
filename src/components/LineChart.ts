@@ -34,10 +34,6 @@ export default class LineChart extends HTMLElement {
     this.state.pixelWidth = this.chart.width;
     this.state.pixelHeight = this.chart.height;
     this.renderingContext = this.chart.getContext("2d");
-
-    if (!this.renderingContext) return;
-
-    this.renderer?.render(this.renderingContext, this.state);
   }
 
   /**

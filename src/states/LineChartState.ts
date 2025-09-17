@@ -47,14 +47,14 @@ export default class LineChartState extends ChartState {
    * @returns A rectangle completely enclosing all points in the line chart.
    */
   public getBoundary(): Rectangle {
-    const topLeft = new Point(Infinity, Infinity);
-    const bottomRight = new Point(-Infinity, -Infinity);
+    const topLeft = new Point(Infinity, -Infinity);
+    const bottomRight = new Point(-Infinity, Infinity);
 
     for(const point of this.points) {
       topLeft.x = Math.min(point.x, topLeft.x);
-      topLeft.y = Math.min(point.y, topLeft.y);
+      topLeft.y = Math.max(point.y, topLeft.y);
       bottomRight.x = Math.max(point.x, bottomRight.x);
-      bottomRight.y = Math.max(point.y, bottomRight.y);
+      bottomRight.y = Math.min(point.y, bottomRight.y);
     }
 
     return new Rectangle(topLeft, bottomRight);
