@@ -25,6 +25,7 @@ export default class LineChartRenderer implements Renderer {
    * Draw the outline of the chart area. And an outline around the entire canvas.
    */
   private drawOutline(renderingContext: CanvasRenderingContext2D, chartState: LineChartState): void {
+    renderingContext.beginPath();
     renderingContext.rect(0, 0, chartState.pixelWidth, chartState.pixelHeight);
     renderingContext.rect(MARGIN, 0, chartState.pixelWidth - MARGIN, chartState.pixelHeight - MARGIN);
     renderingContext.stroke();
@@ -57,7 +58,7 @@ export default class LineChartRenderer implements Renderer {
     renderingContext.textAlign = "center";
     renderingContext.textBaseline = "middle";
 
-    const stepSize = 1;
+    const stepSize = chartState.scaleInterval;
     for(let i = 0; i <= boundary.bottomRight.x - boundary.topLeft.x; i+=stepSize) {
       const xValue = boundary.topLeft.x + i;
       const mappedX = rectangleMapper.map(new Point(xValue, 0)).x;

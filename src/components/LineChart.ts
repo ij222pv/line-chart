@@ -68,6 +68,16 @@ export default class LineChart extends HTMLElement {
    */
   public setPoints(points: Point[]) {
     this.state.setPoints(points);
+    if (!this.renderingContext) return;
+    this.renderer?.render(this.renderingContext!, this.state);
+  }
+
+  /**
+   * Sets the interval between scale markings on the x-axis.
+   * For example, if the interval is set to 5, there may be a marking at x=0, x=5, x=10, etc.
+   */
+  public set scaleInterval(interval: number) {
+    this.state.scaleInterval = interval;
   }
 }
 

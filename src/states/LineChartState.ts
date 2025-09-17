@@ -4,6 +4,7 @@ import ChartState from "./ChartState";
 
 export default class LineChartState extends ChartState {
   private _points: Point[] = [];
+  private _scaleInterval: number = 1;
 
   constructor(points?: Point[]) {
     super();
@@ -57,5 +58,17 @@ export default class LineChartState extends ChartState {
     }
 
     return new Rectangle(topLeft, bottomRight);
+  }
+
+  public set scaleInterval(value: number) {
+    if (typeof value !== "number" || value <= 0) {
+      throw new TypeError("scale interval must be a positive number");
+    }
+
+    this._scaleInterval = value;
+  }
+
+  public get scaleInterval(): number {
+    return this._scaleInterval;
   }
 }
