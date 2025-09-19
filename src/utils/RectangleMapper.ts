@@ -35,6 +35,23 @@ export default class RectangleMapper {
   }
 
   /**
+   * Maps a point relative to the target rectangle back to the source rectangle.
+   */
+  reverseMap(point: Point): Point {
+    const foo = new Point(
+      point.x - this.to.topLeft.x,
+      point.y - this.to.topLeft.y
+    );
+    const bar = new Point(
+      (foo.x / this.to.width) * this.from.width,
+      (foo.y / this.to.height) * this.from.height
+    );
+    const baz = new Point(bar.x + this.from.topLeft.x, bar.y + this.from.topLeft.y);
+
+    return baz;
+  }
+
+  /**
    * Maps a rectangle from one reference frame to another. The rectangle
    * will keep it's relative position in the new rectangle.
    * For example, a rectangle half the size of the source
@@ -44,6 +61,15 @@ export default class RectangleMapper {
   mapRectangle(rectangle: Rectangle): Rectangle {
     const topLeft = this.map(rectangle.topLeft);
     const bottomRight = this.map(rectangle.bottomRight);
+    return new Rectangle(topLeft, bottomRight);
+  }
+
+  /**
+   * Maps a rectangle from the reference frame of the target rectangle back to the source rectangle.
+   */
+  reverseMapRectangle(rectangle: Rectangle): Rectangle {
+    const topLeft = this.reverseMap(rectangle.topLeft);
+    const bottomRight = this.reverseMap(rectangle.bottomRight);
     return new Rectangle(topLeft, bottomRight);
   }
 }
