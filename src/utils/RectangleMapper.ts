@@ -1,5 +1,5 @@
 import Point from "./Point";
-import type Rectangle from "./Rectangle";
+import Rectangle from "./Rectangle";
 
 /**
  * Maps points from the reference frame of one rectangle to another.
@@ -14,7 +14,7 @@ export default class RectangleMapper {
   }
 
   /**
-   * Maps a point from one rectangle to another. The point
+   * Maps a point from the reference frame of one rectangle to another. The point
    * will keep it's relative position in the new rectangle.
    * For example, a point in the center of the source
    * rectangle will be mapped to the center of the target
@@ -32,5 +32,18 @@ export default class RectangleMapper {
     const baz = new Point(bar.x + this.to.topLeft.x, bar.y + this.to.topLeft.y);
 
     return baz;
+  }
+
+  /**
+   * Maps a rectangle from one reference frame to another. The rectangle
+   * will keep it's relative position in the new rectangle.
+   * For example, a rectangle half the size of the source
+   * rectangle will be mapped to a rectangle half the size of the target
+   * rectangle.
+   */
+  mapRectangle(rectangle: Rectangle): Rectangle {
+    const topLeft = this.map(rectangle.topLeft);
+    const bottomRight = this.map(rectangle.bottomRight);
+    return new Rectangle(topLeft, bottomRight);
   }
 }
