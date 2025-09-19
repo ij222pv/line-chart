@@ -7,7 +7,16 @@ import type Renderer from "./Renderer";
 const MARGIN = 25;
 
 export default class LineChartRenderer implements Renderer {
+  private scale: RectangleMapper | null = null;
+  private graphAreaBoundary: Rectangle | null = null;
+
   render(renderingContext: CanvasRenderingContext2D, chartState: LineChartState): void {
+    const boundary: Rectangle = chartState.getBoundary();
+    const pixelBoundary = new Rectangle(new Point(MARGIN + chartState.padding, chartState.padding), new Point(chartState.pixelWidth - chartState.padding, chartState.pixelHeight - MARGIN - chartState.padding));
+    const pixelGraphAreaBoundary = new Rectangle(new Point(MARGIN, 0), new Point(chartState.pixelWidth, chartState.pixelHeight - MARGIN));
+    this.scale = new RectangleMapper(boundary, pixelBoundary);
+    this.graphAreaBoundary = this.scale.reverseMapRectangle(pixelGraphAreaBoundary);
+
     this.clear(renderingContext);
     this.drawOutline(renderingContext, chartState);
     this.drawLine(renderingContext, chartState);
@@ -50,33 +59,43 @@ export default class LineChartRenderer implements Renderer {
    * Draw the scale along the x-axis.
    */
   private drawScale(renderingContext: CanvasRenderingContext2D, chartState: LineChartState): void {
-    const boundary: Rectangle = chartState.getBoundary();
-    const rectangleMapper = new RectangleMapper(boundary, new Rectangle(new Point(MARGIN + chartState.padding, chartState.padding), new Point(chartState.pixelWidth - chartState.padding, chartState.pixelHeight - MARGIN - chartState.padding)));
-
     renderingContext.fillStyle = "black";
     renderingContext.font = "12px Arial";
     renderingContext.textAlign = "center";
     renderingContext.textBaseline = "middle";
 
-    const stepSize = chartState.scaleInterval;
-    for(let xValue = boundary.topLeft.x; xValue <= boundary.bottomRight.x; xValue+=stepSize) {
-      const mappedX = rectangleMapper.map(new Point(xValue, 0)).x;
+    if(this.graphAreaBoundary === null || this.scale === null) {
+      throw new Error("graph area boundary or scale not initialized");
+    }
 
-      renderingContext.fillText(xValue.toFixed(1), mappedX, chartState.pixelHeight - MARGIN / 2);
+    const stepSize = chartState.scaleInterval;
+    const scaleTickGeneratorX = this.getScaleTickPosition(this.graphAreaBoundary.topLeft.x, this.graphAreaBoundary.bottomRight.x);
+    for(let xValue = scaleTickGeneratorX.next().value; xValue !== undefined; xValue = scaleTickGeneratorX.next().value) {
+      const point = this.scale.map(new Point(xValue, this.graphAreaBoundary.bottomRight.y));
+      renderingContext.fillText(xValue.toFixed(1), point.x, point.y + MARGIN * 0.5);
       renderingContext.beginPath();
-      renderingContext.moveTo(mappedX, chartState.pixelHeight - MARGIN);
-      renderingContext.lineTo(mappedX, chartState.pixelHeight - MARGIN * 3 / 4);
+      renderingContext.moveTo(point.x, point.y);
+      renderingContext.lineTo(point.x, point.y + MARGIN * 0.2);
       renderingContext.stroke();
     }
 
-    for(let yValue = boundary.bottomRight.y; yValue <= boundary.topLeft.y; yValue+=stepSize) {
-      const mappedY = rectangleMapper.map(new Point(0, yValue)).y;
-      
-      renderingContext.fillText(yValue.toFixed(1), MARGIN / 2, mappedY);
+    const scaleTickGeneratorY = this.getScaleTickPosition(this.graphAreaBoundary.bottomRight.y, this.graphAreaBoundary.topLeft.y);
+    for(let yValue = scaleTickGeneratorY.next().value; yValue !== undefined; yValue = scaleTickGeneratorY.next().value) {
+      const point = this.scale.map(new Point(this.graphAreaBoundary.topLeft.x, yValue));
+      renderingContext.fillText(yValue.toFixed(1), point.x - MARGIN * 0.5, point.y);
       renderingContext.beginPath();
-      renderingContext.moveTo(MARGIN, mappedY);
-      renderingContext.lineTo(MARGIN * 3 / 4, mappedY);
+      renderingContext.moveTo(point.x, point.y);
+      renderingContext.lineTo(point.x - MARGIN * 0.2, point.y);
       renderingContext.stroke();
+    }
+  }
+
+  private* getScaleTickPosition(start: number, end: number): Generator<number> {
+    const size = end - start;
+    const interval = Math.pow(2, Math.floor(Math.log2(size / 2)) - 1);
+
+    for(let i = Math.ceil(start / interval) * interval; i <= end; i+=interval) {
+      yield i;
     }
   }
 }
