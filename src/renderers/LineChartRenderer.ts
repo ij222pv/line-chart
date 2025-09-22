@@ -19,6 +19,7 @@ export default class LineChartRenderer implements Renderer {
     this.graphAreaBoundary = this.scale.reverseMapRectangle(pixelGraphAreaBoundary);
 
     this.clear(renderingContext);
+    this.drawGrid(renderingContext, chartState);
     this.drawOutline(renderingContext, chartState);
     for(const line of chartState.lines) {
       this.drawLine(renderingContext, chartState, line);
@@ -115,5 +116,36 @@ export default class LineChartRenderer implements Renderer {
     for(let i = Math.ceil(start / finalInterval) * finalInterval; i <= end; i+=finalInterval) {
       yield i;
     }
+  }
+
+  private drawGrid(renderingContext: CanvasRenderingContext2D, _chartState: LineChartState): void {
+    renderingContext.save();
+    renderingContext.strokeStyle = "#e0e0e0";
+
+    if(this.graphAreaBoundary === null || this.scale === null) {
+      throw new Error("graph area boundary or scale not initialized");
+    }
+
+    const scaleTickGeneratorX = this.getScaleTickPosition(this.graphAreaBoundary.topLeft.x, this.graphAreaBoundary.bottomRight.x);
+    for(let xValue = scaleTickGeneratorX.next().value; xValue !== undefined; xValue = scaleTickGeneratorX.next().value) {
+      const point1 = this.scale.map(new Point(xValue, this.graphAreaBoundary.bottomRight.y));
+      const point2 = this.scale.map(new Point(xValue, this.graphAreaBoundary.topLeft.y));
+      renderingContext.beginPath();
+      renderingContext.moveTo(point1.x, point1.y);
+      renderingContext.lineTo(point2.x, point2.y);
+      renderingContext.stroke();
+    }
+
+    const scaleTickGeneratorY = this.getScaleTickPosition(this.graphAreaBoundary.bottomRight.y, this.graphAreaBoundary.topLeft.y);
+    for(let yValue = scaleTickGeneratorY.next().value; yValue !== undefined; yValue = scaleTickGeneratorY.next().value) {
+      const point1 = this.scale.map(new Point(this.graphAreaBoundary.topLeft.x, yValue));
+      const point2 = this.scale.map(new Point(this.graphAreaBoundary.bottomRight.x, yValue));
+      renderingContext.beginPath();
+      renderingContext.moveTo(point1.x, point1.y);
+      renderingContext.lineTo(point2.x, point2.y);
+      renderingContext.stroke();
+    }
+
+    renderingContext.restore();
   }
 }
