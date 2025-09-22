@@ -55,7 +55,14 @@ export default class LineChartRenderer implements Renderer {
       const mappedPoint = rectangleMapper.map(point);
       renderingContext.lineTo(mappedPoint.x, mappedPoint.y);
     }
+
+    renderingContext.save();
+    renderingContext.strokeStyle = "red";
+    renderingContext.lineWidth = 2;
+    renderingContext.lineCap = "round";
+    renderingContext.lineJoin = "round";
     renderingContext.stroke();
+    renderingContext.restore();
   }
 
   /**
