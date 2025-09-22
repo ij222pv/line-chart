@@ -1,5 +1,6 @@
 import type LineChartState from "../states/LineChartState";
 import Point from "../utils/Point";
+import type Polyline from "../utils/Polyline";
 import Rectangle from "../utils/Rectangle";
 import RectangleMapper from "../utils/RectangleMapper";
 import type Renderer from "./Renderer";
@@ -19,7 +20,9 @@ export default class LineChartRenderer implements Renderer {
 
     this.clear(renderingContext);
     this.drawOutline(renderingContext, chartState);
-    this.drawLine(renderingContext, chartState);
+    for(const line of chartState.lines) {
+      this.drawLine(renderingContext, chartState, line);
+    }
     this.drawScale(renderingContext, chartState);
   }
 
@@ -43,12 +46,12 @@ export default class LineChartRenderer implements Renderer {
   /**
    * Draw the line connecting all points in the chart.
    */
-  private drawLine(renderingContext: CanvasRenderingContext2D, chartState: LineChartState): void {
+  private drawLine(renderingContext: CanvasRenderingContext2D, chartState: LineChartState, line: Polyline): void {
     const boundary: Rectangle = chartState.getBoundary();
     const rectangleMapper = new RectangleMapper(boundary, new Rectangle(new Point(MARGIN + chartState.padding, chartState.padding), new Point(chartState.pixelWidth - chartState.padding, chartState.pixelHeight - MARGIN - chartState.padding)));
 
     renderingContext.beginPath();
-    for(const point of chartState.points) {
+    for(const point of line.getPoints()) {
       const mappedPoint = rectangleMapper.map(point);
       renderingContext.lineTo(mappedPoint.x, mappedPoint.y);
     }

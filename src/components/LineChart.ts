@@ -2,7 +2,7 @@ import template from "./LineChart.html.js";
 import type Renderer from "../renderers/Renderer.js";
 import RendererFactoryImpl from "../renderers/RendererFactoryImpl.js";
 import LineChartState from "../states/LineChartState.js";
-import type Point from "../utils/Point.js";
+import type Polyline from "../utils/Polyline.js";
 
 const TAG_NAME = "line-chart";
 
@@ -62,10 +62,14 @@ export default class LineChart extends HTMLElement {
   /**
    * Define the points in the line chart.
    */
-  public setPoints(points: Point[]) {
-    this.state.setPoints(points);
+  public addLine(line: Polyline) {
+    this.state.addLine(line);
     if (!this.renderingContext) return;
     this.renderer?.render(this.renderingContext!, this.state);
+  }
+  
+  public clearLines() {
+    this.state.clearLines();
   }
 
   /**

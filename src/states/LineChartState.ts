@@ -1,46 +1,30 @@
 import Point from "../utils/Point";
+import type Polyline from "../utils/Polyline";
 import Rectangle from "../utils/Rectangle";
 import ChartState from "./ChartState";
 
 export default class LineChartState extends ChartState {
-  private _points: Point[] = [];
+  private _lines: Polyline[] = [];
   private _scaleInterval: number = 1;
   private _padding: number = 25;
 
-  constructor(points?: Point[]) {
+  constructor() {
     super();
-
-    if (points) {
-      this.setPoints(points);
-    }
   }
 
   /**
    * Set the points in the line chart to render.
    */
-  public setPoints(points: Point[]): void {
-    for(const point of points) {
-      if(!(point instanceof Point)) {
-        throw new TypeError("input array contains element of wrong type");
-      }
-    }
-
-    const sortedPoints = points.toSorted((a: Point, b: Point): number => {
-      return a.x - b.x;
-    });
-
-    sortedPoints.forEach((point) => {
-      Object.freeze(point);
-    });
-
-    this._points = sortedPoints;
+  public addLine(line: Polyline): void {
+    this._lines.push(line);
   }
 
-  /**
-   * Get a copy of the points in the line chart.
-   */
-  get points(): Point[] {
-    return Array.from(this._points);
+  public clearLines(): void {
+    this._lines = [];
+  }
+
+  public get lines(): Polyline[] {
+    return this._lines;
   }
 
   /**
@@ -51,7 +35,7 @@ export default class LineChartState extends ChartState {
     const topLeft = new Point(Infinity, -Infinity);
     const bottomRight = new Point(-Infinity, Infinity);
 
-    for(const point of this.points) {
+    for(const point of this.lines.flatMap(line => line.getPoints())) {
       topLeft.x = Math.min(point.x, topLeft.x);
       topLeft.y = Math.max(point.y, topLeft.y);
       bottomRight.x = Math.max(point.x, bottomRight.x);
