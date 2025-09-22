@@ -57,7 +57,7 @@ export default class LineChartRenderer implements Renderer {
     }
 
     renderingContext.save();
-    renderingContext.strokeStyle = "red";
+    renderingContext.strokeStyle = line.getColor().toString();
     renderingContext.lineWidth = 2;
     renderingContext.lineCap = "round";
     renderingContext.lineJoin = "round";

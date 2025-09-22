@@ -2,20 +2,16 @@
  * Represents a color.
  */
 export default class Color {
-  private red: number = 0;
-  private green: number = 0;
-  private blue: number = 0;
+  private cssColor: string;
 
-  constructor(red: number, green: number, blue: number) {
-    this.red = red;
-    this.green = green;
-    this.blue = blue;
+  constructor(cssColor: string = "black") {
+    this.cssColor = cssColor;
   }
 
   /**
    * @return The color as a CSS-compatible string.
    */
   toString(): string {
-    return `rgb(${this.red}, ${this.green}, ${this.blue})`;
+    return this.cssColor;
   }
 }
