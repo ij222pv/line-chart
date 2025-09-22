@@ -58,7 +58,7 @@ export default class LineChartRenderer implements Renderer {
   /**
    * Draw the scale along the x-axis.
    */
-  private drawScale(renderingContext: CanvasRenderingContext2D, chartState: LineChartState): void {
+  private drawScale(renderingContext: CanvasRenderingContext2D, _chartState: LineChartState): void {
     renderingContext.fillStyle = "black";
     renderingContext.font = "12px Arial";
     renderingContext.textAlign = "center";
@@ -68,11 +68,11 @@ export default class LineChartRenderer implements Renderer {
       throw new Error("graph area boundary or scale not initialized");
     }
 
-    const stepSize = chartState.scaleInterval;
+    // const stepSize = chartState.scaleInterval;
     const scaleTickGeneratorX = this.getScaleTickPosition(this.graphAreaBoundary.topLeft.x, this.graphAreaBoundary.bottomRight.x);
     for(let xValue = scaleTickGeneratorX.next().value; xValue !== undefined; xValue = scaleTickGeneratorX.next().value) {
       const point = this.scale.map(new Point(xValue, this.graphAreaBoundary.bottomRight.y));
-      renderingContext.fillText(xValue.toFixed(1), point.x, point.y + MARGIN * 0.5);
+      renderingContext.fillText((Math.round(xValue * 10000) / 10000).toString(), point.x, point.y + MARGIN * 0.5);
       renderingContext.beginPath();
       renderingContext.moveTo(point.x, point.y);
       renderingContext.lineTo(point.x, point.y + MARGIN * 0.2);
@@ -82,7 +82,7 @@ export default class LineChartRenderer implements Renderer {
     const scaleTickGeneratorY = this.getScaleTickPosition(this.graphAreaBoundary.bottomRight.y, this.graphAreaBoundary.topLeft.y);
     for(let yValue = scaleTickGeneratorY.next().value; yValue !== undefined; yValue = scaleTickGeneratorY.next().value) {
       const point = this.scale.map(new Point(this.graphAreaBoundary.topLeft.x, yValue));
-      renderingContext.fillText(yValue.toFixed(1), point.x - MARGIN * 0.5, point.y);
+      renderingContext.fillText((Math.round(yValue * 10000) / 10000).toString(), point.x - MARGIN * 0.5, point.y);
       renderingContext.beginPath();
       renderingContext.moveTo(point.x, point.y);
       renderingContext.lineTo(point.x - MARGIN * 0.2, point.y);
@@ -92,9 +92,17 @@ export default class LineChartRenderer implements Renderer {
 
   private* getScaleTickPosition(start: number, end: number): Generator<number> {
     const size = end - start;
-    const interval = Math.pow(2, Math.floor(Math.log2(size / 2)) - 1);
+    // An interval in the pattern 1, 2, 5, 10, 20, 50, 100, 200, 500, 1000, ...
+    const interval = Math.pow(10, Math.floor(Math.log10(size / 5)));
+    const interval2 = interval * 2;
+    const interval5 = interval * 5;
+    const goalInterval = size / 5;
+    const intervals = [interval, interval2, interval5];
+    const finalInterval = intervals.reduce((prev, curr) =>
+      Math.abs(goalInterval - curr) < Math.abs(goalInterval - prev) ? curr : prev
+    );
 
-    for(let i = Math.ceil(start / interval) * interval; i <= end; i+=interval) {
+    for(let i = Math.ceil(start / finalInterval) * finalInterval; i <= end; i+=finalInterval) {
       yield i;
     }
   }
