@@ -1,3 +1,4 @@
+import LineSegment from "./LineSegment";
 import Point from "./Point";
 import Rectangle from "./Rectangle";
 
@@ -15,7 +16,7 @@ export default class RectangleMapper {
 
   /**
    * Maps a point from the reference frame of one rectangle to another. The point
-   * will keep it's relative position in the new rectangle.
+   * will keep its relative position in the new rectangle.
    * For example, a point in the center of the source
    * rectangle will be mapped to the center of the target
    * rectangle.
@@ -46,14 +47,17 @@ export default class RectangleMapper {
       (foo.x / this.to.width) * this.from.width,
       (foo.y / this.to.height) * this.from.height
     );
-    const baz = new Point(bar.x + this.from.topLeft.x, bar.y + this.from.topLeft.y);
+    const baz = new Point(
+      bar.x + this.from.topLeft.x,
+      bar.y + this.from.topLeft.y
+    );
 
     return baz;
   }
 
   /**
    * Maps a rectangle from one reference frame to another. The rectangle
-   * will keep it's relative position in the new rectangle.
+   * will keep its relative position in the new rectangle.
    * For example, a rectangle half the size of the source
    * rectangle will be mapped to a rectangle half the size of the target
    * rectangle.
@@ -71,5 +75,23 @@ export default class RectangleMapper {
     const topLeft = this.reverseMap(rectangle.topLeft);
     const bottomRight = this.reverseMap(rectangle.bottomRight);
     return new Rectangle(topLeft, bottomRight);
+  }
+
+  /**
+   * Maps a line segment from one reference frame to another. The line segment
+   * will keep its relative position in the new rectangle.
+   */
+  mapLineSegment(line: LineSegment): LineSegment {
+    return new LineSegment(this.map(line.start), this.map(line.end));
+  }
+
+  /**
+   * Maps a line segment from the reference frame of the target rectangle back to the source rectangle.
+   */
+  reverseMapLineSegment(line: LineSegment): LineSegment {
+    return new LineSegment(
+      this.reverseMap(line.start),
+      this.reverseMap(line.end)
+    );
   }
 }
