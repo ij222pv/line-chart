@@ -1,5 +1,5 @@
-const template: HTMLTemplateElement = document.createElement("template");
-template.innerHTML = /* html */ `
+const HTMLTemplate: HTMLTemplateElement = document.createElement("template");
+HTMLTemplate.innerHTML = /* html */ `
 <canvas id="chart"></canvas>
 `;
-export default template;
+export default HTMLTemplate;

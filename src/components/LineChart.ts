@@ -1,8 +1,9 @@
-import template from "./LineChart.html.js";
+import HTMLTemplate from "./LineChart.html.js";
+import CSSTemplate from "./LineChart.css.js";
 import type Renderer from "../renderers/Renderer.js";
-import RendererFactoryImpl from "../renderers/RendererFactoryImpl.js";
 import LineChartState from "../states/LineChartState.js";
 import type Polyline from "../utils/Polyline.js";
+import LineChartRenderer from "../renderers/LineChartRenderer.js";
 
 const TAG_NAME = "line-chart";
 
@@ -15,12 +16,9 @@ export default class LineChart extends HTMLElement {
   constructor() {
     super();
 
-    this.attachShadow({ mode: "open" }).appendChild(
-      template.content.cloneNode(true),
-    );
-
-    const rendererFactory = new RendererFactoryImpl();
-    this.renderer = rendererFactory.makeRenderer(this.state);
+    this.attachShadow({ mode: "open" });
+    this.shadowRoot?.appendChild(HTMLTemplate.content.cloneNode(true));
+    this.shadowRoot?.appendChild(CSSTemplate.content.cloneNode(true));
   }
 
   /**
@@ -28,12 +26,17 @@ export default class LineChart extends HTMLElement {
    */
   async connectedCallback(): Promise<void> {
     this.chart = this.shadowRoot!.querySelector("#chart") ?? null;
-
+    
     if (!this.chart) return;
+    
+    this.chart.width = 800;
+    this.chart.height = 800;
 
     this.state.pixelWidth = this.chart.width;
     this.state.pixelHeight = this.chart.height;
     this.renderingContext = this.chart.getContext("2d");
+
+    this.renderer = new LineChartRenderer(this.renderingContext!, this.state);
   }
 
   /**
