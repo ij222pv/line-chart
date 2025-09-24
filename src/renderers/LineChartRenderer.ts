@@ -237,24 +237,7 @@ export default class LineChartRenderer implements Renderer {
     goalNumberOfTicks: number,
   ): Generator<number> {
     const targetInterval = range.length / goalNumberOfTicks;
-    const closestPowerOfTen = Math.pow(
-      10,
-      Math.floor(Math.log10(targetInterval)),
-    );
-    const intervals = [
-      closestPowerOfTen,
-      closestPowerOfTen * 2,
-      closestPowerOfTen * 5,
-    ];
-    const finalInterval = intervals.reduce((previous, current) => {
-      if (
-        Math.abs(targetInterval - current) < Math.abs(targetInterval - previous)
-      ) {
-        return current;
-      } else {
-        return previous;
-      }
-    });
+    const finalInterval = this.roundTickInterval(targetInterval);
 
     for (
       let i = Math.ceil(range.start / finalInterval) * finalInterval;
@@ -263,6 +246,27 @@ export default class LineChartRenderer implements Renderer {
     ) {
       yield i;
     }
+  }
+
+  /**
+   * Rounds a number to the nearest number matching the pattern 0.1, 0.2, 0.5, 1, 2, 5, 10, 20 etc.
+   */
+  private roundTickInterval(value: number): number {
+    const closestPowerOfTen = Math.pow(10, Math.floor(Math.log10(value)));
+    const intervals = [
+      closestPowerOfTen,
+      closestPowerOfTen * 2,
+      closestPowerOfTen * 5,
+    ];
+    const finalInterval = intervals.reduce((previous, current) => {
+      if (Math.abs(value - current) < Math.abs(value - previous)) {
+        return current;
+      } else {
+        return previous;
+      }
+    });
+
+    return finalInterval;
   }
 
   private drawGrid(): void {
@@ -283,29 +287,33 @@ export default class LineChartRenderer implements Renderer {
     tickPositionIterator: Iterator<number>,
     axis: Axis,
   ): void {
-    this.renderingContext.save();
-    this.renderingContext.strokeStyle = "#e0e0e0";
-
     for (
       let i = tickPositionIterator.next().value;
       i !== undefined;
       i = tickPositionIterator.next().value
     ) {
-      let line: LineSegment;
-      if (axis === Axis.X) {
-        line = new LineSegment(
-          new Point(i, this.chartArea!.bottom),
-          new Point(i, this.chartArea!.top),
-        );
-      } else {
-        line = new LineSegment(
-          new Point(this.chartArea!.left, i),
-          new Point(this.chartArea!.right, i),
-        );
-      }
-      const mappedLine = this.chartToScreenMapper!.mapLineSegment(line);
-      this.drawLineSegment(mappedLine);
+      this.drawGridLine(i, axis);
     }
+  }
+
+  private drawGridLine(value: number, axis: Axis): void {
+    this.renderingContext.save();
+    this.renderingContext.strokeStyle = "#e0e0e0";
+
+    let line: LineSegment;
+    if (axis === Axis.X) {
+      line = new LineSegment(
+        new Point(value, this.chartArea!.bottom),
+        new Point(value, this.chartArea!.top),
+      );
+    } else {
+      line = new LineSegment(
+        new Point(this.chartArea!.left, value),
+        new Point(this.chartArea!.right, value),
+      );
+    }
+    const mappedLine = this.chartToScreenMapper!.mapLineSegment(line);
+    this.drawLineSegment(mappedLine);
 
     this.renderingContext.restore();
   }
