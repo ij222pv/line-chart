@@ -9,8 +9,8 @@ export default class Polyline {
   private color: Color = new Color();
 
   constructor(points: Point[] = []) {
-    for(const point of points) {
-      if(!(point instanceof Point)) {
+    for (const point of points) {
+      if (!(point instanceof Point)) {
         throw new TypeError("input array contains non-Point element");
       }
     }

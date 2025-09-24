@@ -5,7 +5,7 @@ export default class Rectangle {
   private _left: number = 0;
   private _right: number = 0;
   private _bottom: number = 0;
-  
+
   constructor(topLeftPoint: Point, bottomRightPoint: Point) {
     this.topLeft = topLeftPoint;
     this.bottomRight = bottomRightPoint;
@@ -140,7 +140,7 @@ export default class Rectangle {
    * @throws TypeError if not of type Point.
    */
   private validatePoint(point: Point): void {
-    if(!(point instanceof Point)) {
+    if (!(point instanceof Point)) {
       throw new TypeError("argument not of type Point");
     }
   }

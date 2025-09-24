@@ -24,11 +24,11 @@ export default class RectangleMapper {
   map(point: Point): Point {
     const foo = new Point(
       point.x - this.from.topLeft.x,
-      point.y - this.from.topLeft.y
+      point.y - this.from.topLeft.y,
     );
     const bar = new Point(
       (foo.x / this.from.width) * this.to.width,
-      (foo.y / this.from.height) * this.to.height
+      (foo.y / this.from.height) * this.to.height,
     );
     const baz = new Point(bar.x + this.to.topLeft.x, bar.y + this.to.topLeft.y);
 
@@ -41,15 +41,15 @@ export default class RectangleMapper {
   reverseMap(point: Point): Point {
     const foo = new Point(
       point.x - this.to.topLeft.x,
-      point.y - this.to.topLeft.y
+      point.y - this.to.topLeft.y,
     );
     const bar = new Point(
       (foo.x / this.to.width) * this.from.width,
-      (foo.y / this.to.height) * this.from.height
+      (foo.y / this.to.height) * this.from.height,
     );
     const baz = new Point(
       bar.x + this.from.topLeft.x,
-      bar.y + this.from.topLeft.y
+      bar.y + this.from.topLeft.y,
     );
 
     return baz;
@@ -91,7 +91,7 @@ export default class RectangleMapper {
   reverseMapLineSegment(line: LineSegment): LineSegment {
     return new LineSegment(
       this.reverseMap(line.start),
-      this.reverseMap(line.end)
+      this.reverseMap(line.end),
     );
   }
 }

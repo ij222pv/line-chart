@@ -35,7 +35,7 @@ export default class LineChartState extends ChartState {
     const topLeft = new Point(Infinity, -Infinity);
     const bottomRight = new Point(-Infinity, Infinity);
 
-    for(const point of this.lines.flatMap(line => line.getPoints())) {
+    for (const point of this.lines.flatMap((line) => line.getPoints())) {
       topLeft.x = Math.min(point.x, topLeft.x);
       topLeft.y = Math.max(point.y, topLeft.y);
       bottomRight.x = Math.max(point.x, bottomRight.x);

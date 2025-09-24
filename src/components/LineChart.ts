@@ -26,9 +26,9 @@ export default class LineChart extends HTMLElement {
    */
   async connectedCallback(): Promise<void> {
     this.chart = this.shadowRoot!.querySelector("#chart") ?? null;
-    
+
     if (!this.chart) return;
-    
+
     this.chart.width = 800;
     this.chart.height = 800;
 
@@ -42,14 +42,16 @@ export default class LineChart extends HTMLElement {
   /**
    * Handle the element being removed from the DOM.
    */
-  disconnectedCallback(): void {
-
-  }
+  disconnectedCallback(): void {}
 
   /**
    * Handle attribute changes.
    */
-  attributeChangedCallback(_name: string, oldValue: string, newValue: string): void {
+  attributeChangedCallback(
+    _name: string,
+    oldValue: string,
+    newValue: string,
+  ): void {
     if (oldValue === newValue) {
       return;
     }
@@ -70,7 +72,7 @@ export default class LineChart extends HTMLElement {
     if (!this.renderingContext) return;
     this.renderer?.render(this.renderingContext!, this.state);
   }
-  
+
   public clearLines() {
     this.state.clearLines();
   }

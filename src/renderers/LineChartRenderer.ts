@@ -12,7 +12,7 @@ const TICK_LENGTH = MARGIN * 0.2;
 const LABEL_OFFSET = TICK_LENGTH + MARGIN * 0.1;
 enum Axis {
   X,
-  Y
+  Y,
 }
 
 export default class LineChartRenderer implements Renderer {
@@ -22,7 +22,10 @@ export default class LineChartRenderer implements Renderer {
   private chartArea: Rectangle | null = null;
   private pixelChartArea: Rectangle | null = null;
 
-  constructor(renderingContext: CanvasRenderingContext2D, chartState: LineChartState) {
+  constructor(
+    renderingContext: CanvasRenderingContext2D,
+    chartState: LineChartState,
+  ) {
     this.renderingContext = renderingContext;
     this.chartState = chartState;
   }
@@ -32,12 +35,14 @@ export default class LineChartRenderer implements Renderer {
     const pixelLineArea: Rectangle = this.getLineAreaInPixels();
     this.pixelChartArea = this.getChartAreaInPixels();
     this.chartToScreenMapper = new RectangleMapper(lineArea, pixelLineArea);
-    this.chartArea = this.chartToScreenMapper.reverseMapRectangle(this.pixelChartArea);
+    this.chartArea = this.chartToScreenMapper.reverseMapRectangle(
+      this.pixelChartArea,
+    );
 
     this.clear();
     this.drawGrid();
     this.drawOutline();
-    for(const line of this.chartState.lines) {
+    for (const line of this.chartState.lines) {
       this.drawLine(line);
     }
     this.drawAxes();
@@ -51,7 +56,8 @@ export default class LineChartRenderer implements Renderer {
     const left = MARGIN + this.chartState.padding;
     const top = this.chartState.padding;
     const right = this.chartState.canvasWidth - this.chartState.padding;
-    const bottom = this.chartState.canvasHeight - MARGIN - this.chartState.padding;
+    const bottom =
+      this.chartState.canvasHeight - MARGIN - this.chartState.padding;
     return new Rectangle(new Point(left, top), new Point(right, bottom));
   }
 
@@ -72,7 +78,12 @@ export default class LineChartRenderer implements Renderer {
    */
   private clear(): void {
     this.renderingContext.fillStyle = "white";
-    this.renderingContext.fillRect(0, 0, this.renderingContext.canvas.width, this.renderingContext.canvas.height);
+    this.renderingContext.fillRect(
+      0,
+      0,
+      this.renderingContext.canvas.width,
+      this.renderingContext.canvas.height,
+    );
   }
 
   /**
@@ -80,8 +91,18 @@ export default class LineChartRenderer implements Renderer {
    */
   private drawOutline(): void {
     this.renderingContext.beginPath();
-    this.renderingContext.rect(0, 0, this.chartState.canvasWidth, this.chartState.canvasHeight);
-    this.renderingContext.rect(MARGIN, 0, this.chartState.canvasWidth - MARGIN, this.chartState.canvasHeight - MARGIN);
+    this.renderingContext.rect(
+      0,
+      0,
+      this.chartState.canvasWidth,
+      this.chartState.canvasHeight,
+    );
+    this.renderingContext.rect(
+      MARGIN,
+      0,
+      this.chartState.canvasWidth - MARGIN,
+      this.chartState.canvasHeight - MARGIN,
+    );
     this.renderingContext.stroke();
   }
 
@@ -90,7 +111,7 @@ export default class LineChartRenderer implements Renderer {
    */
   private drawLine(line: Polyline): void {
     this.renderingContext.beginPath();
-    for(const point of line.getPoints()) {
+    for (const point of line.getPoints()) {
       const mappedPoint = this.chartToScreenMapper!.map(point);
       this.renderingContext.lineTo(mappedPoint.x, mappedPoint.y);
     }
@@ -111,14 +132,14 @@ export default class LineChartRenderer implements Renderer {
     // X-axis
     const axisTickGeneratorX = this.generateTickPositions(
       new Range(this.chartArea!.left, this.chartArea!.right),
-      this.pixelChartArea!.width / this.chartState.axisTickInterval
+      this.pixelChartArea!.width / this.chartState.axisTickInterval,
     );
     this.drawAxis(axisTickGeneratorX, Axis.X);
-    
+
     // Y-axis
     const axisTickGeneratorY = this.generateTickPositions(
       new Range(this.chartArea!.bottom, this.chartArea!.top),
-      this.pixelChartArea!.height / this.chartState.axisTickInterval
+      this.pixelChartArea!.height / this.chartState.axisTickInterval,
     );
     this.drawAxis(axisTickGeneratorY, Axis.Y);
   }
@@ -129,7 +150,11 @@ export default class LineChartRenderer implements Renderer {
   private drawAxis(tickPositionIterator: Iterator<number>, axis: Axis): void {
     this.setAxisLabelStyle(axis);
 
-    for(let i = tickPositionIterator.next().value; i !== undefined; i = tickPositionIterator.next().value) {
+    for (
+      let i = tickPositionIterator.next().value;
+      i !== undefined;
+      i = tickPositionIterator.next().value
+    ) {
       this.drawTickAndLabel(i, axis);
     }
   }
@@ -150,7 +175,7 @@ export default class LineChartRenderer implements Renderer {
 
   private getTickPosition(value: number, axis: Axis): Point {
     let point: Point;
-    if(axis === Axis.X) {
+    if (axis === Axis.X) {
       point = new Point(value, this.chartArea!.bottom);
     } else {
       point = new Point(this.chartArea!.left, value);
@@ -161,7 +186,7 @@ export default class LineChartRenderer implements Renderer {
 
   private drawTick(basePoint: Point, axis: Axis): void {
     let secondPoint: Point;
-    if(axis === Axis.X) {
+    if (axis === Axis.X) {
       secondPoint = new Point(basePoint.x, basePoint.y + TICK_LENGTH);
     } else {
       secondPoint = new Point(basePoint.x - TICK_LENGTH, basePoint.y);
@@ -171,7 +196,7 @@ export default class LineChartRenderer implements Renderer {
 
   private getTickLabelPosition(tickPosition: Point, axis: Axis): Point {
     let labelPosition: Point;
-    if(axis === Axis.X) {
+    if (axis === Axis.X) {
       labelPosition = new Point(tickPosition.x, tickPosition.y + LABEL_OFFSET);
     } else {
       labelPosition = new Point(tickPosition.x - LABEL_OFFSET, tickPosition.y);
@@ -179,9 +204,6 @@ export default class LineChartRenderer implements Renderer {
     return labelPosition;
   }
 
-  /**
-   * Converts a number into a string.
-   */
   private numberToString(value: number): string {
     // Round to avoid floating point precision issues. Such as -0.6 being displayed as -0.5999999999999992.
     const rounded = this.roundToDecimalPlaces(value, 10);
@@ -196,9 +218,6 @@ export default class LineChartRenderer implements Renderer {
     this.renderingContext.fillText(label, position.x, position.y);
   }
 
-  /**
-   * Draw a line between two points.
-   */
   private drawLineBetweenPoints(point1: Point, point2: Point): void {
     this.renderingContext.beginPath();
     this.renderingContext.moveTo(point1.x, point1.y);
@@ -206,9 +225,6 @@ export default class LineChartRenderer implements Renderer {
     this.renderingContext.stroke();
   }
 
-  /**
-   * Draw a line between two points.
-   */
   private drawLineSegment(line: LineSegment): void {
     this.drawLineBetweenPoints(line.start, line.end);
   }
@@ -216,19 +232,35 @@ export default class LineChartRenderer implements Renderer {
   /**
    * A generator function to yield the positions of axis ticks along an axis.
    */
-  private* generateTickPositions(range: Range, goalNumberOfTicks: number): Generator<number> {
+  private *generateTickPositions(
+    range: Range,
+    goalNumberOfTicks: number,
+  ): Generator<number> {
     const targetInterval = range.length / goalNumberOfTicks;
-    const closestPowerOfTen = Math.pow(10, Math.floor(Math.log10(targetInterval)));
-    const intervals = [closestPowerOfTen, closestPowerOfTen * 2, closestPowerOfTen * 5];
+    const closestPowerOfTen = Math.pow(
+      10,
+      Math.floor(Math.log10(targetInterval)),
+    );
+    const intervals = [
+      closestPowerOfTen,
+      closestPowerOfTen * 2,
+      closestPowerOfTen * 5,
+    ];
     const finalInterval = intervals.reduce((previous, current) => {
-      if(Math.abs(targetInterval - current) < Math.abs(targetInterval - previous)) {
+      if (
+        Math.abs(targetInterval - current) < Math.abs(targetInterval - previous)
+      ) {
         return current;
       } else {
         return previous;
       }
     });
 
-    for(let i = Math.ceil(range.start / finalInterval) * finalInterval; i <= range.end; i+=finalInterval) {
+    for (
+      let i = Math.ceil(range.start / finalInterval) * finalInterval;
+      i <= range.end;
+      i += finalInterval
+    ) {
       yield i;
     }
   }
@@ -236,32 +268,39 @@ export default class LineChartRenderer implements Renderer {
   private drawGrid(): void {
     const axisTickGeneratorX = this.generateTickPositions(
       new Range(this.chartArea!.left, this.chartArea!.right),
-      this.pixelChartArea!.width / this.chartState.axisTickInterval
+      this.pixelChartArea!.width / this.chartState.axisTickInterval,
     );
     this.drawGridLines(axisTickGeneratorX, Axis.X);
 
     const axisTickGeneratorY = this.generateTickPositions(
       new Range(this.chartArea!.bottom, this.chartArea!.top),
-      this.pixelChartArea!.height / this.chartState.axisTickInterval
+      this.pixelChartArea!.height / this.chartState.axisTickInterval,
     );
     this.drawGridLines(axisTickGeneratorY, Axis.Y);
   }
 
-  private drawGridLines(tickPositionIterator: Iterator<number>, axis: Axis): void {
+  private drawGridLines(
+    tickPositionIterator: Iterator<number>,
+    axis: Axis,
+  ): void {
     this.renderingContext.save();
     this.renderingContext.strokeStyle = "#e0e0e0";
 
-    for(let i = tickPositionIterator.next().value; i !== undefined; i = tickPositionIterator.next().value) {
+    for (
+      let i = tickPositionIterator.next().value;
+      i !== undefined;
+      i = tickPositionIterator.next().value
+    ) {
       let line: LineSegment;
-      if(axis === Axis.X) {
+      if (axis === Axis.X) {
         line = new LineSegment(
           new Point(i, this.chartArea!.bottom),
-          new Point(i, this.chartArea!.top)
+          new Point(i, this.chartArea!.top),
         );
       } else {
         line = new LineSegment(
           new Point(this.chartArea!.left, i),
-          new Point(this.chartArea!.right, i)
+          new Point(this.chartArea!.right, i),
         );
       }
       const mappedLine = this.chartToScreenMapper!.mapLineSegment(line);
