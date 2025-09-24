@@ -1,41 +1,40 @@
 import Color from "./Color";
 import Point from "./Point";
 
+type PolylineOptions = {
+  color?: Color;
+  thickness?: number;
+};
+
 /**
  * A collection of points connected by straight line segments.
  */
 export default class Polyline {
-  private points: Point[];
-  private color: Color = new Color();
+  private _points: Point[];
+  private _color: Color;
+  private _thickness: number;
 
-  constructor(points: Point[] = []) {
+  constructor(points: Point[] = [], options?: PolylineOptions) {
     for (const point of points) {
       if (!(point instanceof Point)) {
         throw new TypeError("input array contains non-Point element");
       }
     }
 
-    this.points = Array.from(points);
+    this._points = Array.from(points);
+    this._color = options?.color ?? new Color();
+    this._thickness = options?.thickness ?? 1;
   }
 
-  /**
-   * Get the points in the polyline.
-   * @returns The points in the polyline.
-   */
-  getPoints(): Point[] {
-    return this.points;
+  get points(): Point[] {
+    return this._points;
   }
 
-  /**
-   * Sets the color of the polyline.
-   */
-  setColor(color: Color): this {
-    this.color = color;
-
-    return this;
+  get color(): Color {
+    return this._color;
   }
 
-  getColor(): Color {
-    return this.color;
+  get thickness(): number {
+    return this._thickness;
   }
 }
