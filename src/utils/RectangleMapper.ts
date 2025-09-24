@@ -21,7 +21,7 @@ export default class RectangleMapper {
    * rectangle will be mapped to the center of the target
    * rectangle.
    */
-  map(point: Point): Point {
+  mapPoint(point: Point): Point {
     const foo = new Point(
       point.x - this.from.topLeft.x,
       point.y - this.from.topLeft.y,
@@ -38,7 +38,7 @@ export default class RectangleMapper {
   /**
    * Maps a point relative to the target rectangle back to the source rectangle.
    */
-  reverseMap(point: Point): Point {
+  reverseMapPoint(point: Point): Point {
     const foo = new Point(
       point.x - this.to.topLeft.x,
       point.y - this.to.topLeft.y,
@@ -63,8 +63,8 @@ export default class RectangleMapper {
    * rectangle.
    */
   mapRectangle(rectangle: Rectangle): Rectangle {
-    const topLeft = this.map(rectangle.topLeft);
-    const bottomRight = this.map(rectangle.bottomRight);
+    const topLeft = this.mapPoint(rectangle.topLeft);
+    const bottomRight = this.mapPoint(rectangle.bottomRight);
     return new Rectangle(topLeft, bottomRight);
   }
 
@@ -72,8 +72,8 @@ export default class RectangleMapper {
    * Maps a rectangle from the reference frame of the target rectangle back to the source rectangle.
    */
   reverseMapRectangle(rectangle: Rectangle): Rectangle {
-    const topLeft = this.reverseMap(rectangle.topLeft);
-    const bottomRight = this.reverseMap(rectangle.bottomRight);
+    const topLeft = this.reverseMapPoint(rectangle.topLeft);
+    const bottomRight = this.reverseMapPoint(rectangle.bottomRight);
     return new Rectangle(topLeft, bottomRight);
   }
 
@@ -82,7 +82,7 @@ export default class RectangleMapper {
    * will keep its relative position in the new rectangle.
    */
   mapLineSegment(line: LineSegment): LineSegment {
-    return new LineSegment(this.map(line.start), this.map(line.end));
+    return new LineSegment(this.mapPoint(line.start), this.mapPoint(line.end));
   }
 
   /**
@@ -90,8 +90,8 @@ export default class RectangleMapper {
    */
   reverseMapLineSegment(line: LineSegment): LineSegment {
     return new LineSegment(
-      this.reverseMap(line.start),
-      this.reverseMap(line.end),
+      this.reverseMapPoint(line.start),
+      this.reverseMapPoint(line.end),
     );
   }
 }

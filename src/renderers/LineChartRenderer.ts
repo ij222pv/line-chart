@@ -112,7 +112,7 @@ export default class LineChartRenderer implements Renderer {
   private drawLine(line: Polyline): void {
     this.renderingContext.beginPath();
     for (const point of line.getPoints()) {
-      const mappedPoint = this.chartToScreenMapper!.map(point);
+      const mappedPoint = this.chartToScreenMapper!.mapPoint(point);
       this.renderingContext.lineTo(mappedPoint.x, mappedPoint.y);
     }
 
@@ -180,7 +180,7 @@ export default class LineChartRenderer implements Renderer {
     } else {
       point = new Point(this.chartArea!.left, value);
     }
-    const mappedPoint = this.chartToScreenMapper!.map(point);
+    const mappedPoint = this.chartToScreenMapper!.mapPoint(point);
     return mappedPoint;
   }
 
