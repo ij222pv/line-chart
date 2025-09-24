@@ -5,8 +5,10 @@ import ChartState from "./ChartState";
 
 export default class LineChartState extends ChartState {
   private _lines: Polyline[] = [];
-  private _scaleInterval: number = 1;
-  private _padding: number = 25;
+  private _scaleInterval: number = 50;
+  private _paddingX: number = 0;
+  private _paddingY: number = 0;
+  private _viewport: Rectangle | null = null;
 
   constructor() {
     super();
@@ -35,7 +37,7 @@ export default class LineChartState extends ChartState {
     const topLeft = new Point(Infinity, -Infinity);
     const bottomRight = new Point(-Infinity, Infinity);
 
-    for (const point of this.lines.flatMap((line) => line.getPoints())) {
+    for (const point of this.lines.flatMap((line) => line.points)) {
       topLeft.x = Math.min(point.x, topLeft.x);
       topLeft.y = Math.max(point.y, topLeft.y);
       bottomRight.x = Math.max(point.x, bottomRight.x);
@@ -45,8 +47,28 @@ export default class LineChartState extends ChartState {
     return new Rectangle(topLeft, bottomRight);
   }
 
+  public set viewport(viewport: Rectangle) {
+    this._viewport = viewport;
+  }
+
+  public get viewport(): Rectangle {
+    if (this._viewport === null) {
+      return this.getBoundary();
+    }
+
+    return this._viewport;
+  }
+
+  public autoFit(options: { paddingX?: number, paddingY?: number } = {}): void {
+    // TODO: use pixel padding instead of chart coordinate padding
+    this.paddingX = options.paddingX ?? 0;
+    this.paddingY = options.paddingY ?? 0;
+    const boundary = this.getBoundary();
+    this.viewport = boundary;
+  }
+
   public set axisTickInterval(value: number) {
-    if (typeof value !== "number" || value <= 0) {
+    if (typeof value !== "number" || value <= 0 || !Number.isFinite(value)) {
       throw new TypeError("scale interval must be a positive number");
     }
 
@@ -57,7 +79,27 @@ export default class LineChartState extends ChartState {
     return this._scaleInterval;
   }
 
-  public get padding(): number {
-    return this._padding;
+  public set paddingX(value: number) {
+    if (typeof value !== "number" || value < 0 || !Number.isFinite(value)) {
+      throw new TypeError("padding must be a non-negative number");
+    }
+
+    this._paddingX = value;
+  }
+
+  public get paddingX(): number {
+    return this._paddingX;
+  }
+
+  public set paddingY(value: number) {
+    if (typeof value !== "number" || value < 0 || !Number.isFinite(value)) {
+      throw new TypeError("padding must be a non-negative number");
+    }
+
+    this._paddingY = value;
+  }
+
+  public get paddingY(): number {
+    return this._paddingY;
   }
 }

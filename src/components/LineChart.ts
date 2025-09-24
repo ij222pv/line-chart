@@ -4,6 +4,7 @@ import type Renderer from "../renderers/Renderer.js";
 import LineChartState from "../states/LineChartState.js";
 import type Polyline from "../utils/Polyline.js";
 import LineChartRenderer from "../renderers/LineChartRenderer.js";
+import type Rectangle from "../utils/Rectangle.js";
 
 const TAG_NAME = "line-chart";
 
@@ -48,12 +49,24 @@ export default class LineChart extends HTMLElement {
    * Handle attribute changes.
    */
   attributeChangedCallback(
-    _name: string,
+    name: string,
     oldValue: string,
     newValue: string,
   ): void {
     if (oldValue === newValue) {
       return;
+    }
+
+    switch (name) {
+      case "axisInterval":
+        this.axisInterval = newValue;
+        break;
+      case "linePaddingX":
+        this.linePaddingX = newValue;
+        break;
+      case "linePaddingY":
+        this.linePaddingY = newValue;
+        break;
     }
   }
 
@@ -61,28 +74,45 @@ export default class LineChart extends HTMLElement {
    * A list of attributes for the custom element.
    */
   static get observedAttributes(): string[] {
-    return [];
+    return ["axisInterval", "linePaddingX", "linePaddingY"];
   }
 
-  /**
-   * Define the points in the line chart.
-   */
   public addLine(line: Polyline) {
     this.state.addLine(line);
-    if (!this.renderingContext) return;
-    this.renderer?.render(this.renderingContext!, this.state);
+    this.renderer?.render();
   }
 
   public clearLines() {
     this.state.clearLines();
+    this.renderer?.render();
+  }
+
+  public setViewport(viewport: Rectangle) {
+    this.state.viewport = viewport;
+    this.renderer?.render();
+  }
+
+  public autoFit(options: { paddingX?: number, paddingY?: number } = {}): void {
+    this.state.autoFit(options);
+    this.renderer?.render();
   }
 
   /**
-   * Sets the interval between scale markings on the x-axis.
-   * For example, if the interval is set to 5, there may be a marking at x=0, x=5, x=10, etc.
+   * Sets the interval in pixels between axis ticks. Set to 0 to disable ticks.
    */
-  public set scaleInterval(interval: number) {
-    this.state.axisTickInterval = interval;
+  public set axisInterval(interval: number | string) {
+    this.state.axisTickInterval = Number(interval);
+    this.renderer?.render();
+  }
+
+  public set linePaddingX(padding: number | string) {
+    this.state.paddingX = Number(padding);
+    this.renderer?.render();
+  }
+
+  public set linePaddingY(padding: number | string) {
+    this.state.paddingY = Number(padding);
+    this.renderer?.render();
   }
 }
 

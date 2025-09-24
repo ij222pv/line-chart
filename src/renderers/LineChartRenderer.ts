@@ -31,10 +31,10 @@ export default class LineChartRenderer implements Renderer {
   }
 
   public render(): void {
-    const lineArea: Rectangle = this.chartState.getBoundary();
+    // TODO: factor this out elsewhere. Perhaps the state should keep track of this?
     const pixelLineArea: Rectangle = this.getLineAreaInPixels();
     this.pixelChartArea = this.getChartAreaInPixels();
-    this.chartToScreenMapper = new RectangleMapper(lineArea, pixelLineArea);
+    this.chartToScreenMapper = new RectangleMapper(this.chartState.viewport, pixelLineArea);
     this.chartArea = this.chartToScreenMapper.reverseMapRectangle(
       this.pixelChartArea,
     );
@@ -53,11 +53,11 @@ export default class LineChartRenderer implements Renderer {
    * @returns The chart boundary rectangle in pixel coordinates.
    */
   private getLineAreaInPixels() {
-    const left = MARGIN + this.chartState.padding;
-    const top = this.chartState.padding;
-    const right = this.chartState.canvasWidth - this.chartState.padding;
+    const left = MARGIN + this.chartState.paddingX;
+    const top = this.chartState.paddingY;
+    const right = this.chartState.canvasWidth - this.chartState.paddingX;
     const bottom =
-      this.chartState.canvasHeight - MARGIN - this.chartState.padding;
+      this.chartState.canvasHeight - MARGIN - this.chartState.paddingY;
     return new Rectangle(new Point(left, top), new Point(right, bottom));
   }
 
@@ -111,14 +111,14 @@ export default class LineChartRenderer implements Renderer {
    */
   private drawLine(line: Polyline): void {
     this.renderingContext.beginPath();
-    for (const point of line.getPoints()) {
+    for (const point of line.points) {
       const mappedPoint = this.chartToScreenMapper!.mapPoint(point);
       this.renderingContext.lineTo(mappedPoint.x, mappedPoint.y);
     }
 
     this.renderingContext.save();
-    this.renderingContext.strokeStyle = line.getColor().toString();
-    this.renderingContext.lineWidth = 2;
+    this.renderingContext.strokeStyle = line.color.toString();
+    this.renderingContext.lineWidth = line.thickness;
     this.renderingContext.lineCap = "round";
     this.renderingContext.lineJoin = "round";
     this.renderingContext.stroke();
