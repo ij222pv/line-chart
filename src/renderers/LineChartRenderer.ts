@@ -1,151 +1,273 @@
 import type LineChartState from "../states/LineChartState";
+import LineSegment from "../utils/LineSegment";
 import Point from "../utils/Point";
 import type Polyline from "../utils/Polyline";
+import Range from "../utils/Range";
 import Rectangle from "../utils/Rectangle";
 import RectangleMapper from "../utils/RectangleMapper";
 import type Renderer from "./Renderer";
 
-const MARGIN = 25;
+const MARGIN = 35;
+const TICK_LENGTH = MARGIN * 0.2;
+const LABEL_OFFSET = TICK_LENGTH + MARGIN * 0.1;
+enum Axis {
+  X,
+  Y
+}
 
 export default class LineChartRenderer implements Renderer {
-  private scale: RectangleMapper | null = null;
-  private graphAreaBoundary: Rectangle | null = null;
+  private renderingContext: CanvasRenderingContext2D;
+  private chartState: LineChartState;
+  private chartToScreenMapper: RectangleMapper | null = null;
+  private chartArea: Rectangle | null = null;
+  private pixelChartArea: Rectangle | null = null;
 
-  render(renderingContext: CanvasRenderingContext2D, chartState: LineChartState): void {
-    const boundary: Rectangle = chartState.getBoundary();
-    const pixelBoundary = new Rectangle(new Point(MARGIN + chartState.padding, chartState.padding), new Point(chartState.pixelWidth - chartState.padding, chartState.pixelHeight - MARGIN - chartState.padding));
-    const pixelGraphAreaBoundary = new Rectangle(new Point(MARGIN, 0), new Point(chartState.pixelWidth, chartState.pixelHeight - MARGIN));
-    this.scale = new RectangleMapper(boundary, pixelBoundary);
-    this.graphAreaBoundary = this.scale.reverseMapRectangle(pixelGraphAreaBoundary);
+  constructor(renderingContext: CanvasRenderingContext2D, chartState: LineChartState) {
+    this.renderingContext = renderingContext;
+    this.chartState = chartState;
+  }
 
-    this.clear(renderingContext);
-    this.drawGrid(renderingContext, chartState);
-    this.drawOutline(renderingContext, chartState);
-    for(const line of chartState.lines) {
-      this.drawLine(renderingContext, chartState, line);
+  public render(): void {
+    const lineArea: Rectangle = this.chartState.getBoundary();
+    const pixelLineArea: Rectangle = this.getLineAreaInPixels();
+    this.pixelChartArea = this.getChartAreaInPixels();
+    this.chartToScreenMapper = new RectangleMapper(lineArea, pixelLineArea);
+    this.chartArea = this.chartToScreenMapper.reverseMapRectangle(this.pixelChartArea);
+
+    this.clear();
+    this.drawGrid();
+    this.drawOutline();
+    for(const line of this.chartState.lines) {
+      this.drawLine(line);
     }
-    this.drawScale(renderingContext, chartState);
+    this.drawAxes();
+  }
+
+  /**
+   * Gets the area inside the chart encompassing where lines will be drawn.
+   * @returns The chart boundary rectangle in pixel coordinates.
+   */
+  private getLineAreaInPixels() {
+    const left = MARGIN + this.chartState.padding;
+    const top = this.chartState.padding;
+    const right = this.chartState.canvasWidth - this.chartState.padding;
+    const bottom = this.chartState.canvasHeight - MARGIN - this.chartState.padding;
+    return new Rectangle(new Point(left, top), new Point(right, bottom));
+  }
+
+  /**
+   * Gets the area of the chart where lines will be drawn.
+   * @returns The chart area rectangle in pixel coordinates.
+   */
+  private getChartAreaInPixels() {
+    const left = MARGIN;
+    const top = 0;
+    const right = this.chartState.canvasWidth;
+    const bottom = this.chartState.canvasHeight - MARGIN;
+    return new Rectangle(new Point(left, top), new Point(right, bottom));
   }
 
   /**
    * Clear the entire rendering context.
    */
-  private clear(renderingContext: CanvasRenderingContext2D): void {
-    renderingContext.clearRect(0, 0, renderingContext.canvas.width, renderingContext.canvas.height);
+  private clear(): void {
+    this.renderingContext.fillStyle = "white";
+    this.renderingContext.fillRect(0, 0, this.renderingContext.canvas.width, this.renderingContext.canvas.height);
   }
 
   /**
    * Draw the outline of the chart area. And an outline around the entire canvas.
    */
-  private drawOutline(renderingContext: CanvasRenderingContext2D, chartState: LineChartState): void {
-    renderingContext.beginPath();
-    renderingContext.rect(0, 0, chartState.pixelWidth, chartState.pixelHeight);
-    renderingContext.rect(MARGIN, 0, chartState.pixelWidth - MARGIN, chartState.pixelHeight - MARGIN);
-    renderingContext.stroke();
+  private drawOutline(): void {
+    this.renderingContext.beginPath();
+    this.renderingContext.rect(0, 0, this.chartState.canvasWidth, this.chartState.canvasHeight);
+    this.renderingContext.rect(MARGIN, 0, this.chartState.canvasWidth - MARGIN, this.chartState.canvasHeight - MARGIN);
+    this.renderingContext.stroke();
   }
 
   /**
    * Draw the line connecting all points in the chart.
    */
-  private drawLine(renderingContext: CanvasRenderingContext2D, chartState: LineChartState, line: Polyline): void {
-    const boundary: Rectangle = chartState.getBoundary();
-    const rectangleMapper = new RectangleMapper(boundary, new Rectangle(new Point(MARGIN + chartState.padding, chartState.padding), new Point(chartState.pixelWidth - chartState.padding, chartState.pixelHeight - MARGIN - chartState.padding)));
-
-    renderingContext.beginPath();
+  private drawLine(line: Polyline): void {
+    this.renderingContext.beginPath();
     for(const point of line.getPoints()) {
-      const mappedPoint = rectangleMapper.map(point);
-      renderingContext.lineTo(mappedPoint.x, mappedPoint.y);
+      const mappedPoint = this.chartToScreenMapper!.map(point);
+      this.renderingContext.lineTo(mappedPoint.x, mappedPoint.y);
     }
 
-    renderingContext.save();
-    renderingContext.strokeStyle = line.getColor().toString();
-    renderingContext.lineWidth = 2;
-    renderingContext.lineCap = "round";
-    renderingContext.lineJoin = "round";
-    renderingContext.stroke();
-    renderingContext.restore();
+    this.renderingContext.save();
+    this.renderingContext.strokeStyle = line.getColor().toString();
+    this.renderingContext.lineWidth = 2;
+    this.renderingContext.lineCap = "round";
+    this.renderingContext.lineJoin = "round";
+    this.renderingContext.stroke();
+    this.renderingContext.restore();
   }
 
   /**
-   * Draw the scale along the x-axis.
+   * Draw the axes along the X and Y axis.
    */
-  private drawScale(renderingContext: CanvasRenderingContext2D, _chartState: LineChartState): void {
-    renderingContext.fillStyle = "black";
-    renderingContext.font = "12px Arial";
-    renderingContext.textAlign = "center";
-    renderingContext.textBaseline = "middle";
+  private drawAxes(): void {
+    // X-axis
+    const axisTickGeneratorX = this.generateTickPositions(
+      new Range(this.chartArea!.left, this.chartArea!.right),
+      this.pixelChartArea!.width / this.chartState.axisTickInterval
+    );
+    this.drawAxis(axisTickGeneratorX, Axis.X);
+    
+    // Y-axis
+    const axisTickGeneratorY = this.generateTickPositions(
+      new Range(this.chartArea!.bottom, this.chartArea!.top),
+      this.pixelChartArea!.height / this.chartState.axisTickInterval
+    );
+    this.drawAxis(axisTickGeneratorY, Axis.Y);
+  }
 
-    if(this.graphAreaBoundary === null || this.scale === null) {
-      throw new Error("graph area boundary or scale not initialized");
-    }
+  /**
+   * Draw the axis markings and numbers along one axis.
+   */
+  private drawAxis(tickPositionIterator: Iterator<number>, axis: Axis): void {
+    this.setAxisLabelStyle(axis);
 
-    // const stepSize = chartState.scaleInterval;
-    const scaleTickGeneratorX = this.getScaleTickPosition(this.graphAreaBoundary.topLeft.x, this.graphAreaBoundary.bottomRight.x);
-    for(let xValue = scaleTickGeneratorX.next().value; xValue !== undefined; xValue = scaleTickGeneratorX.next().value) {
-      const point = this.scale.map(new Point(xValue, this.graphAreaBoundary.bottomRight.y));
-      renderingContext.fillText((Math.round(xValue * 10000) / 10000).toString(), point.x, point.y + MARGIN * 0.5);
-      renderingContext.beginPath();
-      renderingContext.moveTo(point.x, point.y);
-      renderingContext.lineTo(point.x, point.y + MARGIN * 0.2);
-      renderingContext.stroke();
-    }
-
-    const scaleTickGeneratorY = this.getScaleTickPosition(this.graphAreaBoundary.bottomRight.y, this.graphAreaBoundary.topLeft.y);
-    for(let yValue = scaleTickGeneratorY.next().value; yValue !== undefined; yValue = scaleTickGeneratorY.next().value) {
-      const point = this.scale.map(new Point(this.graphAreaBoundary.topLeft.x, yValue));
-      renderingContext.fillText((Math.round(yValue * 10000) / 10000).toString(), point.x - MARGIN * 0.5, point.y);
-      renderingContext.beginPath();
-      renderingContext.moveTo(point.x, point.y);
-      renderingContext.lineTo(point.x - MARGIN * 0.2, point.y);
-      renderingContext.stroke();
+    for(let i = tickPositionIterator.next().value; i !== undefined; i = tickPositionIterator.next().value) {
+      this.drawTickAndLabel(i, axis);
     }
   }
 
-  private* getScaleTickPosition(start: number, end: number): Generator<number> {
-    const size = end - start;
-    // An interval in the pattern 1, 2, 5, 10, 20, 50, 100, 200, 500, 1000, ...
-    const interval = Math.pow(10, Math.floor(Math.log10(size / 5)));
-    const interval2 = interval * 2;
-    const interval5 = interval * 5;
-    const goalInterval = size / 5;
-    const intervals = [interval, interval2, interval5];
-    const finalInterval = intervals.reduce((prev, curr) =>
-      Math.abs(goalInterval - curr) < Math.abs(goalInterval - prev) ? curr : prev
-    );
+  private setAxisLabelStyle(axis: Axis): void {
+    this.renderingContext.fillStyle = "black";
+    this.renderingContext.font = "12px Arial";
+    this.renderingContext.textAlign = axis === Axis.X ? "center" : "right";
+    this.renderingContext.textBaseline = axis === Axis.X ? "top" : "middle";
+  }
 
-    for(let i = Math.ceil(start / finalInterval) * finalInterval; i <= end; i+=finalInterval) {
+  private drawTickAndLabel(value: number, axis: Axis): void {
+    const tickPosition = this.getTickPosition(value, axis);
+    this.drawTick(tickPosition, axis);
+    const labelPosition = this.getTickLabelPosition(tickPosition, axis);
+    this.drawTickLabel(labelPosition, this.numberToString(value));
+  }
+
+  private getTickPosition(value: number, axis: Axis): Point {
+    let point: Point;
+    if(axis === Axis.X) {
+      point = new Point(value, this.chartArea!.bottom);
+    } else {
+      point = new Point(this.chartArea!.left, value);
+    }
+    const mappedPoint = this.chartToScreenMapper!.map(point);
+    return mappedPoint;
+  }
+
+  private drawTick(basePoint: Point, axis: Axis): void {
+    let secondPoint: Point;
+    if(axis === Axis.X) {
+      secondPoint = new Point(basePoint.x, basePoint.y + TICK_LENGTH);
+    } else {
+      secondPoint = new Point(basePoint.x - TICK_LENGTH, basePoint.y);
+    }
+    this.drawLineBetweenPoints(basePoint, secondPoint);
+  }
+
+  private getTickLabelPosition(tickPosition: Point, axis: Axis): Point {
+    let labelPosition: Point;
+    if(axis === Axis.X) {
+      labelPosition = new Point(tickPosition.x, tickPosition.y + LABEL_OFFSET);
+    } else {
+      labelPosition = new Point(tickPosition.x - LABEL_OFFSET, tickPosition.y);
+    }
+    return labelPosition;
+  }
+
+  /**
+   * Converts a number into a string.
+   */
+  private numberToString(value: number): string {
+    // Round to avoid floating point precision issues. Such as -0.6 being displayed as -0.5999999999999992.
+    const rounded = this.roundToDecimalPlaces(value, 10);
+    return rounded.toString();
+  }
+
+  private roundToDecimalPlaces(value: number, decimalPlaces: number): number {
+    return parseFloat(value.toFixed(decimalPlaces));
+  }
+
+  private drawTickLabel(position: Point, label: string): void {
+    this.renderingContext.fillText(label, position.x, position.y);
+  }
+
+  /**
+   * Draw a line between two points.
+   */
+  private drawLineBetweenPoints(point1: Point, point2: Point): void {
+    this.renderingContext.beginPath();
+    this.renderingContext.moveTo(point1.x, point1.y);
+    this.renderingContext.lineTo(point2.x, point2.y);
+    this.renderingContext.stroke();
+  }
+
+  /**
+   * Draw a line between two points.
+   */
+  private drawLineSegment(line: LineSegment): void {
+    this.drawLineBetweenPoints(line.start, line.end);
+  }
+
+  /**
+   * A generator function to yield the positions of axis ticks along an axis.
+   */
+  private* generateTickPositions(range: Range, goalNumberOfTicks: number): Generator<number> {
+    const targetInterval = range.length / goalNumberOfTicks;
+    const closestPowerOfTen = Math.pow(10, Math.floor(Math.log10(targetInterval)));
+    const intervals = [closestPowerOfTen, closestPowerOfTen * 2, closestPowerOfTen * 5];
+    const finalInterval = intervals.reduce((previous, current) => {
+      if(Math.abs(targetInterval - current) < Math.abs(targetInterval - previous)) {
+        return current;
+      } else {
+        return previous;
+      }
+    });
+
+    for(let i = Math.ceil(range.start / finalInterval) * finalInterval; i <= range.end; i+=finalInterval) {
       yield i;
     }
   }
 
-  private drawGrid(renderingContext: CanvasRenderingContext2D, _chartState: LineChartState): void {
-    renderingContext.save();
-    renderingContext.strokeStyle = "#e0e0e0";
+  private drawGrid(): void {
+    const axisTickGeneratorX = this.generateTickPositions(
+      new Range(this.chartArea!.left, this.chartArea!.right),
+      this.pixelChartArea!.width / this.chartState.axisTickInterval
+    );
+    this.drawGridLines(axisTickGeneratorX, Axis.X);
 
-    if(this.graphAreaBoundary === null || this.scale === null) {
-      throw new Error("graph area boundary or scale not initialized");
+    const axisTickGeneratorY = this.generateTickPositions(
+      new Range(this.chartArea!.bottom, this.chartArea!.top),
+      this.pixelChartArea!.height / this.chartState.axisTickInterval
+    );
+    this.drawGridLines(axisTickGeneratorY, Axis.Y);
+  }
+
+  private drawGridLines(tickPositionIterator: Iterator<number>, axis: Axis): void {
+    this.renderingContext.save();
+    this.renderingContext.strokeStyle = "#e0e0e0";
+
+    for(let i = tickPositionIterator.next().value; i !== undefined; i = tickPositionIterator.next().value) {
+      let line: LineSegment;
+      if(axis === Axis.X) {
+        line = new LineSegment(
+          new Point(i, this.chartArea!.bottom),
+          new Point(i, this.chartArea!.top)
+        );
+      } else {
+        line = new LineSegment(
+          new Point(this.chartArea!.left, i),
+          new Point(this.chartArea!.right, i)
+        );
+      }
+      const mappedLine = this.chartToScreenMapper!.mapLineSegment(line);
+      this.drawLineSegment(mappedLine);
     }
 
-    const scaleTickGeneratorX = this.getScaleTickPosition(this.graphAreaBoundary.topLeft.x, this.graphAreaBoundary.bottomRight.x);
-    for(let xValue = scaleTickGeneratorX.next().value; xValue !== undefined; xValue = scaleTickGeneratorX.next().value) {
-      const point1 = this.scale.map(new Point(xValue, this.graphAreaBoundary.bottomRight.y));
-      const point2 = this.scale.map(new Point(xValue, this.graphAreaBoundary.topLeft.y));
-      renderingContext.beginPath();
-      renderingContext.moveTo(point1.x, point1.y);
-      renderingContext.lineTo(point2.x, point2.y);
-      renderingContext.stroke();
-    }
-
-    const scaleTickGeneratorY = this.getScaleTickPosition(this.graphAreaBoundary.bottomRight.y, this.graphAreaBoundary.topLeft.y);
-    for(let yValue = scaleTickGeneratorY.next().value; yValue !== undefined; yValue = scaleTickGeneratorY.next().value) {
-      const point1 = this.scale.map(new Point(this.graphAreaBoundary.topLeft.x, yValue));
-      const point2 = this.scale.map(new Point(this.graphAreaBoundary.bottomRight.x, yValue));
-      renderingContext.beginPath();
-      renderingContext.moveTo(point1.x, point1.y);
-      renderingContext.lineTo(point2.x, point2.y);
-      renderingContext.stroke();
-    }
-
-    renderingContext.restore();
+    this.renderingContext.restore();
   }
 }

@@ -45,7 +45,7 @@ export default class LineChartState extends ChartState {
     return new Rectangle(topLeft, bottomRight);
   }
 
-  public set scaleInterval(value: number) {
+  public set axisTickInterval(value: number) {
     if (typeof value !== "number" || value <= 0) {
       throw new TypeError("scale interval must be a positive number");
     }
@@ -53,7 +53,7 @@ export default class LineChartState extends ChartState {
     this._scaleInterval = value;
   }
 
-  public get scaleInterval(): number {
+  public get axisTickInterval(): number {
     return this._scaleInterval;
   }
 

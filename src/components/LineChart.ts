@@ -32,8 +32,8 @@ export default class LineChart extends HTMLElement {
     this.chart.width = 800;
     this.chart.height = 800;
 
-    this.state.pixelWidth = this.chart.width;
-    this.state.pixelHeight = this.chart.height;
+    this.state.canvasWidth = this.chart.width;
+    this.state.canvasHeight = this.chart.height;
     this.renderingContext = this.chart.getContext("2d");
 
     this.renderer = new LineChartRenderer(this.renderingContext!, this.state);
@@ -80,7 +80,7 @@ export default class LineChart extends HTMLElement {
    * For example, if the interval is set to 5, there may be a marking at x=0, x=5, x=10, etc.
    */
   public set scaleInterval(interval: number) {
-    this.state.scaleInterval = interval;
+    this.state.axisTickInterval = interval;
   }
 }
 

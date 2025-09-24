@@ -2,6 +2,6 @@
  * An abstract base class for chart states.
  */
 export default abstract class ChartState {
-  public pixelWidth: number = 0;
-  public pixelHeight: number = 0;
+  public canvasWidth: number = 0;
+  public canvasHeight: number = 0;
 } 
