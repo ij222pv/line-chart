@@ -6,12 +6,12 @@ import Rectangle from "./Rectangle";
  * Maps points from the reference frame of one rectangle to another.
  */
 export default class RectangleMapper {
-  private from: Rectangle;
-  private to: Rectangle;
+  private source: Rectangle;
+  private target: Rectangle;
 
   constructor(from: Rectangle, to: Rectangle) {
-    this.from = from;
-    this.to = to;
+    this.source = from;
+    this.target = to;
   }
 
   /**
@@ -22,37 +22,40 @@ export default class RectangleMapper {
    * rectangle.
    */
   mapPoint(point: Point): Point {
-    const foo = new Point(
-      point.x - this.from.topLeft.x,
-      point.y - this.from.topLeft.y,
+    const relativeToSource = new Point(
+      point.x - this.source.topLeft.x,
+      point.y - this.source.topLeft.y,
     );
-    const bar = new Point(
-      (foo.x / this.from.width) * this.to.width,
-      (foo.y / this.from.height) * this.to.height,
+    const scaledToTarget = new Point(
+      (relativeToSource.x / this.source.width) * this.target.width,
+      (relativeToSource.y / this.source.height) * this.target.height,
     );
-    const baz = new Point(bar.x + this.to.topLeft.x, bar.y + this.to.topLeft.y);
+    const mappedToTarget = new Point(
+      scaledToTarget.x + this.target.topLeft.x,
+      scaledToTarget.y + this.target.topLeft.y,
+    );
 
-    return baz;
+    return mappedToTarget;
   }
 
   /**
    * Maps a point relative to the target rectangle back to the source rectangle.
    */
   reverseMapPoint(point: Point): Point {
-    const foo = new Point(
-      point.x - this.to.topLeft.x,
-      point.y - this.to.topLeft.y,
+    const relativeToSource = new Point(
+      point.x - this.target.topLeft.x,
+      point.y - this.target.topLeft.y,
     );
-    const bar = new Point(
-      (foo.x / this.to.width) * this.from.width,
-      (foo.y / this.to.height) * this.from.height,
+    const scaledToTarget = new Point(
+      (relativeToSource.x / this.target.width) * this.source.width,
+      (relativeToSource.y / this.target.height) * this.source.height,
     );
-    const baz = new Point(
-      bar.x + this.from.topLeft.x,
-      bar.y + this.from.topLeft.y,
+    const mappedToTarget = new Point(
+      scaledToTarget.x + this.source.topLeft.x,
+      scaledToTarget.y + this.source.topLeft.y,
     );
 
-    return baz;
+    return mappedToTarget;
   }
 
   /**
