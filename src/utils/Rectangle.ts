@@ -7,8 +7,12 @@ export default class Rectangle {
   private _bottom: number = 0;
 
   constructor(topLeftPoint: Point, bottomRightPoint: Point) {
-    this.topLeft = topLeftPoint;
-    this.bottomRight = bottomRightPoint;
+    this.validatePoint(topLeftPoint);
+    this.validatePoint(bottomRightPoint);
+    this._top = topLeftPoint.y;
+    this._left = topLeftPoint.x;
+    this._bottom = bottomRightPoint.y;
+    this._right = bottomRightPoint.x;
   }
 
   /**
@@ -19,28 +23,10 @@ export default class Rectangle {
   }
 
   /**
-   * Set the top left point of the rectangle.
-   */
-  set topLeft(point: Point) {
-    this.validatePoint(point);
-    this.top = point.y;
-    this.left = point.x;
-  }
-
-  /**
    * Get the top right point of the rectangle.
    */
   get topRight(): Point {
     return new Point(this.right, this.top);
-  }
-
-  /**
-   * Set the top left point of the rectangle.
-   */
-  set topRight(point: Point) {
-    this.validatePoint(point);
-    this.top = point.y;
-    this.right = point.x;
   }
 
   /**
@@ -51,64 +37,26 @@ export default class Rectangle {
   }
 
   /**
-   * Set the bottom right point of the rectangle.
-   */
-  set bottomRight(point: Point) {
-    this.validatePoint(point);
-    this.bottom = point.y;
-    this.right = point.x;
-  }
-
-  /**
    * Get the bottom left point of the rectangle.
    */
   get bottomLeft(): Point {
     return new Point(this.left, this.bottom);
   }
 
-  /**
-   * Set the bottom left point of the rectangle.
-   */
-  set bottomLeft(point: Point) {
-    this.validatePoint(point);
-    this.bottom = point.y;
-    this.left = point.x;
-  }
-
   get top(): number {
     return this._top;
-  }
-
-  set top(value: number) {
-    this.validateNumber(value);
-    this._top = value;
   }
 
   get right(): number {
     return this._right;
   }
 
-  set right(value: number) {
-    this.validateNumber(value);
-    this._right = value;
-  }
-
   get bottom(): number {
     return this._bottom;
   }
 
-  set bottom(value: number) {
-    this.validateNumber(value);
-    this._bottom = value;
-  }
-
   get left(): number {
     return this._left;
-  }
-
-  set left(value: number) {
-    this.validateNumber(value);
-    this._left = value;
   }
 
   /**
@@ -123,16 +71,6 @@ export default class Rectangle {
    */
   get height(): number {
     return this.bottom - this.top;
-  }
-
-  /**
-   * Validates that the argument is a number.
-   * @throws TypeError if not a number.
-   */
-  private validateNumber(value: number): void {
-    if (typeof value !== "number") {
-      throw new TypeError("argument must be number");
-    }
   }
 
   /**
