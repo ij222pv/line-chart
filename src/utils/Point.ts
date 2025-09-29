@@ -3,8 +3,10 @@ export default class Point {
   private _y: number = 0;
 
   constructor(x: number, y: number) {
-    this.x = x;
-    this.y = y;
+    this.validateNumber(x);
+    this.validateNumber(y);
+    this._x = x;
+    this._y = y;
   }
 
   /**
@@ -19,22 +21,6 @@ export default class Point {
    */
   get y() {
     return this._y;
-  }
-
-  /**
-   * Set the x coordinate of the point.
-   */
-  set x(value) {
-    this.validateNumber(value);
-    this._x = value;
-  }
-
-  /**
-   * Set the y coordinate of the point.
-   */
-  set y(value) {
-    this.validateNumber(value);
-    this._y = value;
   }
 
   /**
