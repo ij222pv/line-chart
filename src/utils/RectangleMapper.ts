@@ -23,16 +23,16 @@ export default class RectangleMapper {
    */
   mapPoint(point: Point): Point {
     const relativeToSource = new Point(
-      point.x - this.source.topLeft.x,
-      point.y - this.source.topLeft.y,
+      point.x - this.source.left,
+      point.y - this.source.top,
     );
     const scaledToTarget = new Point(
       (relativeToSource.x / this.source.width) * this.target.width,
       (relativeToSource.y / this.source.height) * this.target.height,
     );
     const mappedToTarget = new Point(
-      scaledToTarget.x + this.target.topLeft.x,
-      scaledToTarget.y + this.target.topLeft.y,
+      scaledToTarget.x + this.target.left,
+      scaledToTarget.y + this.target.top,
     );
 
     return mappedToTarget;
@@ -43,16 +43,16 @@ export default class RectangleMapper {
    */
   reverseMapPoint(point: Point): Point {
     const relativeToSource = new Point(
-      point.x - this.target.topLeft.x,
-      point.y - this.target.topLeft.y,
+      point.x - this.target.left,
+      point.y - this.target.top,
     );
     const scaledToTarget = new Point(
       (relativeToSource.x / this.target.width) * this.source.width,
       (relativeToSource.y / this.target.height) * this.source.height,
     );
     const mappedToTarget = new Point(
-      scaledToTarget.x + this.source.topLeft.x,
-      scaledToTarget.y + this.source.topLeft.y,
+      scaledToTarget.x + this.source.left,
+      scaledToTarget.y + this.source.top,
     );
 
     return mappedToTarget;
