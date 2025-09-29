@@ -16,25 +16,23 @@ enum Axis {
 }
 
 export default class LineChartRenderer implements Renderer {
-  private renderingContext: CanvasRenderingContext2D;
-  private chartState: LineChartState;
   private chartToScreenMapper: RectangleMapper | null = null;
   private chartArea: Rectangle | null = null;
   private pixelChartArea: Rectangle | null = null;
 
   constructor(
-    renderingContext: CanvasRenderingContext2D,
-    chartState: LineChartState,
-  ) {
-    this.renderingContext = renderingContext;
-    this.chartState = chartState;
-  }
+    private renderingContext: CanvasRenderingContext2D,
+    private chartState: LineChartState,
+  ) {}
 
   public render(): void {
     // TODO: factor this out elsewhere. Perhaps the state should keep track of this?
     const pixelLineArea: Rectangle = this.getLineAreaInPixels();
     this.pixelChartArea = this.getChartAreaInPixels();
-    this.chartToScreenMapper = new RectangleMapper(this.chartState.viewport, pixelLineArea);
+    this.chartToScreenMapper = new RectangleMapper(
+      this.chartState.viewport,
+      pixelLineArea,
+    );
     this.chartArea = this.chartToScreenMapper.reverseMapRectangle(
       this.pixelChartArea,
     );
