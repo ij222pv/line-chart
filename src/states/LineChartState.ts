@@ -34,14 +34,18 @@ export default class LineChartState extends ChartState {
    * @returns A rectangle completely enclosing all points in the line chart.
    */
   public getBoundary(): Rectangle {
-    const topLeft = new Point(Infinity, -Infinity);
-    const bottomRight = new Point(-Infinity, Infinity);
+    let topLeft = new Point(Infinity, -Infinity);
+    let bottomRight = new Point(-Infinity, Infinity);
 
     for (const point of this.lines.flatMap((line) => line.points)) {
-      topLeft.x = Math.min(point.x, topLeft.x);
-      topLeft.y = Math.max(point.y, topLeft.y);
-      bottomRight.x = Math.max(point.x, bottomRight.x);
-      bottomRight.y = Math.min(point.y, bottomRight.y);
+      topLeft = new Point(
+        Math.min(point.x, topLeft.x),
+        Math.max(point.y, topLeft.y),
+      );
+      bottomRight = new Point(
+        Math.max(point.x, bottomRight.x),
+        Math.min(point.y, bottomRight.y),
+      );
     }
 
     return new Rectangle(topLeft, bottomRight);
@@ -59,7 +63,7 @@ export default class LineChartState extends ChartState {
     return this._viewport;
   }
 
-  public autoFit(options: { paddingX?: number, paddingY?: number } = {}): void {
+  public autoFit(options: { paddingX?: number; paddingY?: number } = {}): void {
     // TODO: use pixel padding instead of chart coordinate padding
     this.paddingX = options.paddingX ?? 0;
     this.paddingY = options.paddingY ?? 0;
