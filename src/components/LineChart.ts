@@ -38,6 +38,7 @@ export default class LineChart extends HTMLElement {
     this.renderingContext = this.chart.getContext("2d");
 
     this.renderer = new LineChartRenderer(this.renderingContext!, this.state);
+    this.renderer.render();
   }
 
   /**
@@ -61,12 +62,6 @@ export default class LineChart extends HTMLElement {
       case "axisInterval":
         this.axisInterval = newValue;
         break;
-      case "linePaddingX":
-        this.linePaddingX = newValue;
-        break;
-      case "linePaddingY":
-        this.linePaddingY = newValue;
-        break;
     }
   }
 
@@ -74,7 +69,7 @@ export default class LineChart extends HTMLElement {
    * A list of attributes for the custom element.
    */
   static get observedAttributes(): string[] {
-    return ["axisInterval", "linePaddingX", "linePaddingY"];
+    return ["axisInterval"];
   }
 
   public addLine(line: Polyline) {
@@ -92,7 +87,7 @@ export default class LineChart extends HTMLElement {
     this.renderer?.render();
   }
 
-  public autoFit(options: { paddingX?: number, paddingY?: number } = {}): void {
+  public autoFit(options: { paddingX?: number; paddingY?: number } = {}): void {
     this.state.autoFit(options);
     this.renderer?.render();
   }
@@ -102,16 +97,6 @@ export default class LineChart extends HTMLElement {
    */
   public set axisInterval(interval: number | string) {
     this.state.axisTickInterval = Number(interval);
-    this.renderer?.render();
-  }
-
-  public set linePaddingX(padding: number | string) {
-    this.state.paddingX = Number(padding);
-    this.renderer?.render();
-  }
-
-  public set linePaddingY(padding: number | string) {
-    this.state.paddingY = Number(padding);
     this.renderer?.render();
   }
 }
