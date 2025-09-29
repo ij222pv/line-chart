@@ -48,14 +48,14 @@ export default class LineChartRenderer implements Renderer {
     this.renderingContext.rect(
       0,
       0,
-      this.chartState.canvasWidth,
-      this.chartState.canvasHeight,
+      this.renderingContext.canvas.width,
+      this.renderingContext.canvas.height,
     );
     this.renderingContext.rect(
       MARGIN,
       0,
-      this.chartState.canvasWidth - MARGIN,
-      this.chartState.canvasHeight - MARGIN,
+      this.renderingContext.canvas.width - MARGIN,
+      this.renderingContext.canvas.height - MARGIN,
     );
     this.renderingContext.stroke();
   }
