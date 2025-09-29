@@ -2,11 +2,7 @@
  * Represents a color.
  */
 export default class Color {
-  private cssColor: string;
-
-  constructor(cssColor: string = "black") {
-    this.cssColor = cssColor;
-  }
+  constructor(private cssColor: string = "black") {}
 
   /**
    * @return The color as a CSS-compatible string.
