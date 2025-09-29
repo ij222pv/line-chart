@@ -77,21 +77,37 @@ export default class LineChart extends HTMLElement {
     return ["axisInterval", "width", "height"];
   }
 
-  public addLine(line: Polyline) {
+  /**
+   * Adds a line to the chart.
+   * @param line The polyline object to render in the chart.
+   */
+  public addLine(line: Polyline): void {
     this.state.addLine(line);
     this.renderer?.render();
   }
 
-  public clearLines() {
+  /**
+   * Removes all lines from the chart.
+   */
+  public clearLines(): void {
     this.state.clearLines();
     this.renderer?.render();
   }
 
-  public setViewport(viewport: Rectangle) {
+  /**
+   * Sets the chart viewport to the specified rectangle. Note that the coordinates are in chart-space and not in screen-space.
+   * @param viewport The rectangle to use as viewport in chart coordinates.
+   */
+  public setViewport(viewport: Rectangle): void {
     this.state.viewport = viewport;
     this.renderer?.render();
   }
 
+  /**
+   * Automatically fit all lines into the viewport.
+   * @param options.paddingX An optional padding on the x-axis.
+   * @param options.paddingY An optional padding on the y-axis.
+   */
   public autoFitViewport(
     options: { paddingX?: number; paddingY?: number } = {},
   ): void {
@@ -100,13 +116,17 @@ export default class LineChart extends HTMLElement {
   }
 
   /**
-   * Sets the interval in pixels between axis ticks. Set to 0 to disable ticks.
+   * Sets the interval in pixels between axis ticks.
+   * @param interval The target interval between ticks.
    */
   public set axisInterval(interval: number | string) {
     this.state.axisTickInterval = Number(interval);
     this.renderer?.render();
   }
 
+  /**
+   * The width of the chart canvas in pixels.
+   */
   public get width(): number {
     return this._width;
   }
@@ -120,6 +140,9 @@ export default class LineChart extends HTMLElement {
     this.updateCanvasSize();
   }
 
+  /**
+   * The height of the chart canvas in pixels.
+   */
   public get height(): number {
     return this._height;
   }

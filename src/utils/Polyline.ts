@@ -26,14 +26,23 @@ export default class Polyline {
     this._thickness = options?.thickness ?? 1;
   }
 
+  /**
+   * The points making up the polyline.
+   */
   get points(): Point[] {
     return this._points;
   }
 
+  /**
+   * The color of the polyline.
+   */
   get color(): Color {
     return this._color;
   }
 
+  /**
+   * The thickness of the polyline in pixels.
+   */
   get thickness(): number {
     return this._thickness;
   }
