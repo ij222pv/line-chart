@@ -65,6 +65,14 @@ The `options` object may contain:
 
 The target interval in pixels between axis ticks. The actual interval will differ from this value to ensure that ticks are at "nice" values.
 
+**width**
+
+The width of the chart canvas in pixels. Defaults to 500.
+
+**height**
+
+The height of the chart canvas in pixels. Defaults to 500.
+
 ### **Polyline**
 **constructor(points: Point[], options?: Object)**
 

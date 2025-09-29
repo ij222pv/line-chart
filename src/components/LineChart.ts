@@ -13,6 +13,8 @@ export default class LineChart extends HTMLElement {
   private renderingContext: CanvasRenderingContext2D | null = null;
   private state = new LineChartState();
   private renderer: Renderer | null = null;
+  private _width: number = 500;
+  private _height: number = 500;
 
   constructor() {
     super();
@@ -30,11 +32,8 @@ export default class LineChart extends HTMLElement {
 
     if (!this.chart) return;
 
-    this.chart.width = 800;
-    this.chart.height = 800;
+    this.updateCanvasSize();
 
-    this.state.canvasWidth = this.chart.width;
-    this.state.canvasHeight = this.chart.height;
     this.renderingContext = this.chart.getContext("2d");
 
     this.renderer = new LineChartRenderer(this.renderingContext!, this.state);
@@ -62,6 +61,12 @@ export default class LineChart extends HTMLElement {
       case "axisInterval":
         this.axisInterval = newValue;
         break;
+      case "width":
+        this.width = newValue;
+        break;
+      case "height":
+        this.height = newValue;
+        break;
     }
   }
 
@@ -69,7 +74,7 @@ export default class LineChart extends HTMLElement {
    * A list of attributes for the custom element.
    */
   static get observedAttributes(): string[] {
-    return ["axisInterval"];
+    return ["axisInterval", "width", "height"];
   }
 
   public addLine(line: Polyline) {
@@ -100,6 +105,42 @@ export default class LineChart extends HTMLElement {
   public set axisInterval(interval: number | string) {
     this.state.axisTickInterval = Number(interval);
     this.renderer?.render();
+  }
+
+  public get width(): number {
+    return this._width;
+  }
+
+  public set width(value: number | string) {
+    const width = Number(value);
+    if (!Number.isFinite(width) || width <= 0) {
+      throw new TypeError("width must be a positive number");
+    }
+    this._width = width;
+    this.updateCanvasSize();
+  }
+
+  public get height(): number {
+    return this._height;
+  }
+
+  public set height(value: number | string) {
+    const height = Number(value);
+    if (!Number.isFinite(height) || height <= 0) {
+      throw new TypeError("height must be a positive number");
+    }
+    this._height = height;
+    this.updateCanvasSize();
+  }
+
+  private updateCanvasSize(): void {
+    if (this.chart) {
+      this.chart.width = this.width;
+      this.chart.height = this.height;
+      this.state.canvasWidth = this.width;
+      this.state.canvasHeight = this.height;
+      this.renderer?.render();
+    }
   }
 }
 
