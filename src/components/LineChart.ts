@@ -87,7 +87,9 @@ export default class LineChart extends HTMLElement {
     this.renderer?.render();
   }
 
-  public autoFit(options: { paddingX?: number; paddingY?: number } = {}): void {
+  public autoFitViewport(
+    options: { paddingX?: number; paddingY?: number } = {},
+  ): void {
     this.state.autoFit(options);
     this.renderer?.render();
   }

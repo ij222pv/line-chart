@@ -28,7 +28,7 @@ lineChart.addLine(
     thickness: 5,
   })
 );
-lineChart.autoFit({
+lineChart.autoFitViewport({
   paddingY: 60,
   paddingX: 20,
 });
@@ -51,7 +51,7 @@ Removes all lines from the chart.
 
 Sets the viewport of the chart to the specified rectangle, in chart coordinates.
 
-**autoFit(options: Object): void**
+**autoFitViewport(options: Object): void**
 
 Automatically adjusts the viewport to fit all lines.
 
