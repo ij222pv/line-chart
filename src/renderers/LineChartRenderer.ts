@@ -3,8 +3,6 @@ import LineSegment from "../utils/LineSegment";
 import Point from "../utils/Point";
 import type Polyline from "../utils/Polyline";
 import Range from "../utils/Range";
-import Rectangle from "../utils/Rectangle";
-import RectangleMapper from "../utils/RectangleMapper";
 import type Renderer from "./Renderer";
 
 const MARGIN = 35;
@@ -16,59 +14,17 @@ enum Axis {
 }
 
 export default class LineChartRenderer implements Renderer {
-  private chartToScreenMapper: RectangleMapper | null = null;
-  private chartArea: Rectangle | null = null;
-  private pixelChartArea: Rectangle | null = null;
-
   constructor(
     private renderingContext: CanvasRenderingContext2D,
     private chartState: LineChartState,
   ) {}
 
   public render(): void {
-    // TODO: factor this out elsewhere. Perhaps the state should keep track of this?
-    const pixelLineArea: Rectangle = this.getLineAreaInPixels();
-    this.pixelChartArea = this.getChartAreaInPixels();
-    this.chartToScreenMapper = new RectangleMapper(
-      this.chartState.viewport,
-      pixelLineArea,
-    );
-    this.chartArea = this.chartToScreenMapper.reverseMapRectangle(
-      this.pixelChartArea,
-    );
-
     this.clear();
     this.drawGrid();
     this.drawOutline();
-    for (const line of this.chartState.lines) {
-      this.drawLine(line);
-    }
+    this.drawLines();
     this.drawAxes();
-  }
-
-  /**
-   * Gets the area inside the chart encompassing where lines will be drawn.
-   * @returns The chart boundary rectangle in pixel coordinates.
-   */
-  private getLineAreaInPixels() {
-    const left = MARGIN + this.chartState.paddingX;
-    const top = this.chartState.paddingY;
-    const right = this.chartState.canvasWidth - this.chartState.paddingX;
-    const bottom =
-      this.chartState.canvasHeight - MARGIN - this.chartState.paddingY;
-    return new Rectangle(new Point(left, top), new Point(right, bottom));
-  }
-
-  /**
-   * Gets the area of the chart where lines will be drawn.
-   * @returns The chart area rectangle in pixel coordinates.
-   */
-  private getChartAreaInPixels() {
-    const left = MARGIN;
-    const top = 0;
-    const right = this.chartState.canvasWidth;
-    const bottom = this.chartState.canvasHeight - MARGIN;
-    return new Rectangle(new Point(left, top), new Point(right, bottom));
   }
 
   /**
@@ -104,13 +60,19 @@ export default class LineChartRenderer implements Renderer {
     this.renderingContext.stroke();
   }
 
+  private drawLines(): void {
+    for (const line of this.chartState.lines) {
+      this.drawLine(line);
+    }
+  }
+
   /**
    * Draw the line connecting all points in the chart.
    */
   private drawLine(line: Polyline): void {
     this.renderingContext.beginPath();
     for (const point of line.points) {
-      const mappedPoint = this.chartToScreenMapper!.mapPoint(point);
+      const mappedPoint = this.chartState.chartToScreenMapper!.mapPoint(point);
       this.renderingContext.lineTo(mappedPoint.x, mappedPoint.y);
     }
 
@@ -129,15 +91,21 @@ export default class LineChartRenderer implements Renderer {
   private drawAxes(): void {
     // X-axis
     const axisTickGeneratorX = this.generateTickPositions(
-      new Range(this.chartArea!.left, this.chartArea!.right),
-      this.pixelChartArea!.width / this.chartState.axisTickInterval,
+      new Range(
+        this.chartState.viewport!.left,
+        this.chartState.viewport!.right,
+      ),
+      this.chartState.pixelViewport!.width / this.chartState.axisTickInterval,
     );
     this.drawAxis(axisTickGeneratorX, Axis.X);
 
     // Y-axis
     const axisTickGeneratorY = this.generateTickPositions(
-      new Range(this.chartArea!.bottom, this.chartArea!.top),
-      this.pixelChartArea!.height / this.chartState.axisTickInterval,
+      new Range(
+        this.chartState.viewport!.bottom,
+        this.chartState.viewport!.top,
+      ),
+      this.chartState.pixelViewport!.height / this.chartState.axisTickInterval,
     );
     this.drawAxis(axisTickGeneratorY, Axis.Y);
   }
@@ -174,11 +142,11 @@ export default class LineChartRenderer implements Renderer {
   private getTickPosition(value: number, axis: Axis): Point {
     let point: Point;
     if (axis === Axis.X) {
-      point = new Point(value, this.chartArea!.bottom);
+      point = new Point(value, this.chartState.viewport!.bottom);
     } else {
-      point = new Point(this.chartArea!.left, value);
+      point = new Point(this.chartState.viewport!.left, value);
     }
-    const mappedPoint = this.chartToScreenMapper!.mapPoint(point);
+    const mappedPoint = this.chartState.chartToScreenMapper!.mapPoint(point);
     return mappedPoint;
   }
 
@@ -269,14 +237,20 @@ export default class LineChartRenderer implements Renderer {
 
   private drawGrid(): void {
     const axisTickGeneratorX = this.generateTickPositions(
-      new Range(this.chartArea!.left, this.chartArea!.right),
-      this.pixelChartArea!.width / this.chartState.axisTickInterval,
+      new Range(
+        this.chartState.viewport!.left,
+        this.chartState.viewport!.right,
+      ),
+      this.chartState.pixelViewport!.width / this.chartState.axisTickInterval,
     );
     this.drawGridLines(axisTickGeneratorX, Axis.X);
 
     const axisTickGeneratorY = this.generateTickPositions(
-      new Range(this.chartArea!.bottom, this.chartArea!.top),
-      this.pixelChartArea!.height / this.chartState.axisTickInterval,
+      new Range(
+        this.chartState.viewport!.bottom,
+        this.chartState.viewport!.top,
+      ),
+      this.chartState.pixelViewport!.height / this.chartState.axisTickInterval,
     );
     this.drawGridLines(axisTickGeneratorY, Axis.Y);
   }
@@ -301,16 +275,17 @@ export default class LineChartRenderer implements Renderer {
     let line: LineSegment;
     if (axis === Axis.X) {
       line = new LineSegment(
-        new Point(value, this.chartArea!.bottom),
-        new Point(value, this.chartArea!.top),
+        new Point(value, this.chartState.viewport!.bottom),
+        new Point(value, this.chartState.viewport!.top),
       );
     } else {
       line = new LineSegment(
-        new Point(this.chartArea!.left, value),
-        new Point(this.chartArea!.right, value),
+        new Point(this.chartState.viewport!.left, value),
+        new Point(this.chartState.viewport!.right, value),
       );
     }
-    const mappedLine = this.chartToScreenMapper!.mapLineSegment(line);
+    const mappedLine =
+      this.chartState.chartToScreenMapper!.mapLineSegment(line);
     this.drawLineSegment(mappedLine);
 
     this.renderingContext.restore();

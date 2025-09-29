@@ -1,7 +1,10 @@
 import Point from "../utils/Point";
 import type Polyline from "../utils/Polyline";
 import Rectangle from "../utils/Rectangle";
+import RectangleMapper from "../utils/RectangleMapper";
 import ChartState from "./ChartState";
+
+const MARGIN = 35;
 
 export default class LineChartState extends ChartState {
   private _lines: Polyline[] = [];
@@ -105,5 +108,33 @@ export default class LineChartState extends ChartState {
 
   public get paddingY(): number {
     return this._paddingY;
+  }
+
+  /**
+   * Gets the area inside the chart encompassing where lines will be drawn.
+   * @returns The chart boundary rectangle in pixel coordinates.
+   */
+  public get pixelViewportMinusPadding() {
+    const left = MARGIN + this.paddingX;
+    const top = this.paddingY;
+    const right = this.canvasWidth - this.paddingX;
+    const bottom = this.canvasHeight - MARGIN - this.paddingY;
+    return new Rectangle(new Point(left, top), new Point(right, bottom));
+  }
+
+  /**
+   * Gets the area of the chart where lines will be drawn.
+   * @returns The chart area rectangle in pixel coordinates.
+   */
+  public get pixelViewport() {
+    const left = MARGIN;
+    const top = 0;
+    const right = this.canvasWidth;
+    const bottom = this.canvasHeight - MARGIN;
+    return new Rectangle(new Point(left, top), new Point(right, bottom));
+  }
+
+  public get chartToScreenMapper(): RectangleMapper {
+    return new RectangleMapper(this.viewport, this.pixelViewportMinusPadding);
   }
 }
