@@ -32,11 +32,7 @@ export default class LineChartState extends ChartState {
     return this._lines;
   }
 
-  /**
-   * Finds and returns the boundary rectangle enclosing all points in the line chart.
-   * @returns A rectangle completely enclosing all points in the line chart.
-   */
-  public getBoundary(): Rectangle {
+  public get boundingBoxOfLines(): Rectangle {
     let topLeft = new Point(Infinity, -Infinity);
     let bottomRight = new Point(-Infinity, Infinity);
 
@@ -60,18 +56,16 @@ export default class LineChartState extends ChartState {
 
   public get viewport(): Rectangle {
     if (this._viewport === null) {
-      return this.getBoundary();
+      return this.boundingBoxOfLines;
     }
 
     return this._viewport;
   }
 
   public autoFit(options: { paddingX?: number; paddingY?: number } = {}): void {
-    // TODO: use pixel padding instead of chart coordinate padding
     this.paddingX = options.paddingX ?? 0;
     this.paddingY = options.paddingY ?? 0;
-    const boundary = this.getBoundary();
-    this.viewport = boundary;
+    this.viewport = this.boundingBoxOfLines;
   }
 
   public set axisTickInterval(value: number) {
@@ -110,10 +104,6 @@ export default class LineChartState extends ChartState {
     return this._paddingY;
   }
 
-  /**
-   * Gets the area inside the chart encompassing where lines will be drawn.
-   * @returns The chart boundary rectangle in pixel coordinates.
-   */
   public get pixelViewportMinusPadding() {
     const left = MARGIN + this.paddingX;
     const top = this.paddingY;
@@ -122,10 +112,6 @@ export default class LineChartState extends ChartState {
     return new Rectangle(new Point(left, top), new Point(right, bottom));
   }
 
-  /**
-   * Gets the area of the chart where lines will be drawn.
-   * @returns The chart area rectangle in pixel coordinates.
-   */
   public get pixelViewport() {
     const left = MARGIN;
     const top = 0;
