@@ -1,7 +1,6 @@
 # Line chart
 
 ![Version](https://img.shields.io/github/package-json/v/ij222pv/line-chart)
-
 ![License](https://img.shields.io/github/license/ij222pv/line-chart)
 
 ## Installation
@@ -65,7 +64,7 @@ The `options` object may contain:
 
 `paddingY: number` - The padding in pixels on the y-axis between chart lines and chart edge.
 
-**axisInterval**
+**axisTickInterval**
 
 The target interval in pixels between axis ticks. The actual interval will differ from this value to ensure that ticks are at "nice" values.
 

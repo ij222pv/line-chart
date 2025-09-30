@@ -61,8 +61,8 @@ export default class LineChart extends HTMLElement {
     }
 
     switch (name) {
-      case "axisInterval":
-        this.axisInterval = newValue;
+      case "axisTickInterval":
+        this.axisTickInterval = newValue;
         break;
       case "width":
         this.width = newValue;
@@ -77,7 +77,7 @@ export default class LineChart extends HTMLElement {
    * A list of attributes for the custom element.
    */
   static get observedAttributes(): string[] {
-    return ["axisInterval", "width", "height"];
+    return ["axisTickInterval", "width", "height"];
   }
 
   /**
@@ -122,7 +122,7 @@ export default class LineChart extends HTMLElement {
    * Sets the interval in pixels between axis ticks.
    * @param interval The target interval between ticks.
    */
-  public set axisInterval(interval: number | string) {
+  public set axisTickInterval(interval: number | string) {
     this.state.axisTickInterval = Number(interval);
     this.renderer?.render();
   }
