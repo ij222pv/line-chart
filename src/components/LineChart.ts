@@ -16,6 +16,9 @@ export default class LineChart extends HTMLElement {
   private _width: number = 500;
   private _height: number = 500;
 
+  /**
+   * Creates a new LineChart custom element.
+   */
   constructor() {
     super();
 
