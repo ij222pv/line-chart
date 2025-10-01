@@ -3,6 +3,7 @@ import LineSegment from "../utils/LineSegment";
 import Point from "../utils/Point";
 import type Polyline from "../utils/Polyline";
 import Range from "../utils/Range";
+import type Rectangle from "../utils/Rectangle";
 import type Renderer from "./Renderer";
 
 const MARGIN = 35;
@@ -133,13 +134,13 @@ export default class LineChartRenderer implements Renderer {
    * Rounds a number to the nearest number matching the pattern 0.1, 0.2, 0.5, 1, 2, 5, 10, 20 etc.
    */
   private roundToNiceTickInterval(unrounded: number): number {
-    const closestPowerOfTen = this.getClosestPowerOfTen(unrounded);
-    const possibleIntervals = [
-      closestPowerOfTen,
-      closestPowerOfTen * 2,
-      closestPowerOfTen * 5,
-    ];
+    const possibleIntervals = this.getPossibleTickIntervals(unrounded);
     return this.getClosestNumberInArray(unrounded, possibleIntervals);
+  }
+
+  private getPossibleTickIntervals(unrounded: number): number[] {
+    const closestPowerOfTen = this.getClosestPowerOfTen(unrounded);
+    return [closestPowerOfTen, closestPowerOfTen * 2, closestPowerOfTen * 5];
   }
 
   private getClosestPowerOfTen(number: number): number {
@@ -170,22 +171,37 @@ export default class LineChartRenderer implements Renderer {
   }
 
   private drawGridLine(value: number, axis: Axis): void {
-    let line: LineSegment;
-    if (axis === Axis.X) {
-      line = new LineSegment(
-        new Point(value, this.chartState.viewport!.bottom),
-        new Point(value, this.chartState.viewport!.top),
-      );
-    } else {
-      line = new LineSegment(
-        new Point(this.chartState.viewport!.left, value),
-        new Point(this.chartState.viewport!.right, value),
-      );
-    }
-    const mappedLine =
-      this.chartState.chartToScreenMapper!.mapLineSegment(line);
+    const pixelLine = this.getPixelGridLineSegment(value, axis);
     this.setGridLineStyle();
-    this.drawLineSegment(mappedLine);
+    this.drawLineSegment(pixelLine);
+  }
+
+  private getPixelGridLineSegment(value: number, axis: Axis): LineSegment {
+    const line = this.getGridLineSegment(value, axis);
+    return this.chartState.chartToScreenMapper.mapLineSegment(line);
+  }
+
+  private getGridLineSegment(value: number, axis: Axis): LineSegment {
+    if (axis === Axis.X) {
+      return this.getGridLineSegmentOnX(value);
+    } else if (axis === Axis.Y) {
+      return this.getGridLineSegmentOnY(value);
+    }
+    throw new TypeError("invalid axis");
+  }
+
+  private getGridLineSegmentOnX(value: number): LineSegment {
+    return new LineSegment(
+      new Point(value, this.chartState.viewport!.bottom),
+      new Point(value, this.chartState.viewport!.top),
+    );
+  }
+
+  private getGridLineSegmentOnY(value: number): LineSegment {
+    return new LineSegment(
+      new Point(this.chartState.viewport!.left, value),
+      new Point(this.chartState.viewport!.right, value),
+    );
   }
 
   private setGridLineStyle(): void {
@@ -204,18 +220,14 @@ export default class LineChartRenderer implements Renderer {
     this.renderingContext.stroke();
   }
 
-  /**
-   * Draw the outline of the chart area. And an outline around the entire canvas.
-   */
   private drawOutline(): void {
-    this.renderingContext.beginPath();
-    this.renderingContext.rect(
-      MARGIN,
-      0,
-      this.renderingContext.canvas.width - MARGIN,
-      this.renderingContext.canvas.height - MARGIN,
-    );
     this.resetStyle();
+    this.drawRectangle(this.chartState.pixelViewport);
+  }
+
+  private drawRectangle(rect: Rectangle): void {
+    this.renderingContext.beginPath();
+    this.renderingContext.rect(rect.left, rect.top, rect.width, rect.height);
     this.renderingContext.stroke();
   }
 
@@ -226,7 +238,7 @@ export default class LineChartRenderer implements Renderer {
   }
 
   /**
-   * Draw the line connecting all points in the chart.
+   * Draw a line in the chart.
    */
   private drawLine(line: Polyline): void {
     this.setChartLineStyle(line);
@@ -246,28 +258,11 @@ export default class LineChartRenderer implements Renderer {
     this.renderingContext.lineJoin = "round";
   }
 
-  /**
-   * Draw the axes along the X and Y axis.
-   */
   private drawAxes(): void {
-    // X-axis
-    const axisTickGeneratorX = this.generateTickPositions(
-      new Range(
-        this.chartState.viewport!.left,
-        this.chartState.viewport!.right,
-      ),
-      this.chartState.pixelViewport!.width / this.chartState.axisTickInterval,
-    );
+    const axisTickGeneratorX = this.getTickGeneratorFromAxis(Axis.X);
     this.drawAxis(axisTickGeneratorX, Axis.X);
 
-    // Y-axis
-    const axisTickGeneratorY = this.generateTickPositions(
-      new Range(
-        this.chartState.viewport!.bottom,
-        this.chartState.viewport!.top,
-      ),
-      this.chartState.pixelViewport!.height / this.chartState.axisTickInterval,
-    );
+    const axisTickGeneratorY = this.getTickGeneratorFromAxis(Axis.Y);
     this.drawAxis(axisTickGeneratorY, Axis.Y);
   }
 
