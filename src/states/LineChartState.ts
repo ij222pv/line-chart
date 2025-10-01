@@ -72,9 +72,11 @@ export default class LineChartState extends ChartState {
   public autoFit(options: { paddingX?: number; paddingY?: number } = {}): void {
     this.paddingX = options.paddingX ?? 0;
     this.paddingY = options.paddingY ?? 0;
-    this.viewport = this.chartToScreenMapper.reverseMapRectangle(
-      this.pixelViewport,
+    const autoFitMapper = new RectangleMapper(
+      this.boundingBoxOfLines,
+      this.pixelViewportMinusPadding,
     );
+    this.viewport = autoFitMapper.reverseMapRectangle(this.pixelViewport);
   }
 
   public set axisTickInterval(value: number) {
@@ -130,9 +132,6 @@ export default class LineChartState extends ChartState {
   }
 
   public get chartToScreenMapper(): RectangleMapper {
-    return new RectangleMapper(
-      this.boundingBoxOfLines,
-      this.pixelViewportMinusPadding,
-    );
+    return new RectangleMapper(this.viewport, this.pixelViewport);
   }
 }
