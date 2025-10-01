@@ -23,8 +23,9 @@ export default class LineChartRenderer implements Renderer {
   public render(): void {
     this.clear();
     this.drawGrid();
-    this.drawOutline();
     this.drawLines();
+    this.drawSideMargins();
+    this.drawOutline();
     this.drawAxes();
   }
 
@@ -220,17 +221,6 @@ export default class LineChartRenderer implements Renderer {
     this.renderingContext.stroke();
   }
 
-  private drawOutline(): void {
-    this.resetStyle();
-    this.drawRectangle(this.chartState.pixelViewport);
-  }
-
-  private drawRectangle(rect: Rectangle): void {
-    this.renderingContext.beginPath();
-    this.renderingContext.rect(rect.left, rect.top, rect.width, rect.height);
-    this.renderingContext.stroke();
-  }
-
   private drawLines(): void {
     for (const line of this.chartState.lines) {
       this.drawLine(line);
@@ -256,6 +246,44 @@ export default class LineChartRenderer implements Renderer {
     this.renderingContext.lineWidth = line.thickness;
     this.renderingContext.lineCap = "round";
     this.renderingContext.lineJoin = "round";
+  }
+
+  private drawSideMargins(): void {
+    this.drawLeftMargin();
+    this.drawBottomMargin();
+  }
+
+  private drawLeftMargin(): void {
+    this.resetStyle();
+    this.renderingContext.fillStyle = "white";
+    this.renderingContext.fillRect(
+      0,
+      0,
+      MARGIN,
+      this.renderingContext.canvas.height,
+    );
+  }
+
+  private drawBottomMargin(): void {
+    this.resetStyle();
+    this.renderingContext.fillStyle = "white";
+    this.renderingContext.fillRect(
+      0,
+      this.renderingContext.canvas.height - MARGIN,
+      this.renderingContext.canvas.width,
+      MARGIN,
+    );
+  }
+
+  private drawOutline(): void {
+    this.resetStyle();
+    this.drawRectangle(this.chartState.pixelViewport);
+  }
+
+  private drawRectangle(rect: Rectangle): void {
+    this.renderingContext.beginPath();
+    this.renderingContext.rect(rect.left, rect.top, rect.width, rect.height);
+    this.renderingContext.stroke();
   }
 
   private drawAxes(): void {
