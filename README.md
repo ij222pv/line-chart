@@ -146,7 +146,9 @@ Get the color as a CSS-compatible string.
 
 ## Contributing
 
-Anybody can contribute to this project by opening issues or pull requests.
+If you find any issues or have suggestions for improvements, please feel free to open an issue.
+
+If you want to contribute code, please fork the repository and create a pull request with your modifications.
 
 ## License
 
