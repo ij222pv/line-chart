@@ -4,6 +4,11 @@ export default class Rectangle {
     private _left;
     private _right;
     private _bottom;
+    /**
+     * Creates a Rectangle defined by two points.
+     * @param topLeftPoint The top left point of the rectangle.
+     * @param bottomRightPoint The bottom right point of the rectangle.
+     */
     constructor(topLeftPoint: Point, bottomRightPoint: Point);
     /**
      * Get the top left point of the rectangle.

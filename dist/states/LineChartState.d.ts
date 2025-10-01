@@ -1,5 +1,6 @@
 import type Polyline from "../utils/Polyline";
 import Rectangle from "../utils/Rectangle";
+import RectangleMapper from "../utils/RectangleMapper";
 import ChartState from "./ChartState";
 export default class LineChartState extends ChartState {
     private _lines;
@@ -7,18 +8,16 @@ export default class LineChartState extends ChartState {
     private _paddingX;
     private _paddingY;
     private _viewport;
+    private _boundingBoxOfLines;
     constructor();
     /**
      * Set the points in the line chart to render.
      */
     addLine(line: Polyline): void;
     clearLines(): void;
+    private calculateBoundingBoxOfLines;
     get lines(): Polyline[];
-    /**
-     * Finds and returns the boundary rectangle enclosing all points in the line chart.
-     * @returns A rectangle completely enclosing all points in the line chart.
-     */
-    getBoundary(): Rectangle;
+    get boundingBoxOfLines(): Rectangle;
     set viewport(viewport: Rectangle);
     get viewport(): Rectangle;
     autoFit(options?: {
@@ -31,4 +30,7 @@ export default class LineChartState extends ChartState {
     get paddingX(): number;
     set paddingY(value: number);
     get paddingY(): number;
+    get pixelViewportMinusPadding(): Rectangle;
+    get pixelViewport(): Rectangle;
+    get chartToScreenMapper(): RectangleMapper;
 }

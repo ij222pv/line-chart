@@ -7,6 +7,9 @@ export default class LineChart extends HTMLElement {
     private renderer;
     private _width;
     private _height;
+    /**
+     * Creates a new LineChart custom element.
+     */
     constructor();
     /**
      * Handle the element being added to the DOM.
@@ -51,7 +54,7 @@ export default class LineChart extends HTMLElement {
      * Sets the interval in pixels between axis ticks.
      * @param interval The target interval between ticks.
      */
-    set axisInterval(interval: number | string);
+    set axisTickInterval(interval: number | string);
     /**
      * The width of the chart canvas in pixels.
      */

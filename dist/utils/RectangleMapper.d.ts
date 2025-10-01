@@ -16,10 +16,16 @@ export default class RectangleMapper {
      * rectangle.
      */
     mapPoint(point: Point): Point;
+    translatePointFromSource(point: Point): Point;
+    scalePointToTarget(point: Point): Point;
+    translatePointToTarget(point: Point): Point;
     /**
      * Maps a point relative to the target rectangle back to the source rectangle.
      */
     reverseMapPoint(point: Point): Point;
+    translatePointFromTarget(point: Point): Point;
+    scalePointToSource(point: Point): Point;
+    translatePointToSource(point: Point): Point;
     /**
      * Maps a rectangle from one reference frame to another. The rectangle
      * will keep its relative position in the new rectangle.

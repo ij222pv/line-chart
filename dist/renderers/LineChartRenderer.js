@@ -1,8 +1,6 @@
 import LineSegment from "../utils/LineSegment";
 import Point from "../utils/Point";
 import Range from "../utils/Range";
-import Rectangle from "../utils/Rectangle";
-import RectangleMapper from "../utils/RectangleMapper";
 const MARGIN = 35;
 const TICK_LENGTH = MARGIN * 0.2;
 const LABEL_OFFSET = TICK_LENGTH + MARGIN * 0.1;
@@ -14,97 +12,209 @@ var Axis;
 export default class LineChartRenderer {
     renderingContext;
     chartState;
-    chartToScreenMapper = null;
-    chartArea = null;
-    pixelChartArea = null;
     constructor(renderingContext, chartState) {
         this.renderingContext = renderingContext;
         this.chartState = chartState;
     }
     render() {
-        // TODO: factor this out elsewhere. Perhaps the state should keep track of this?
-        const pixelLineArea = this.getLineAreaInPixels();
-        this.pixelChartArea = this.getChartAreaInPixels();
-        this.chartToScreenMapper = new RectangleMapper(this.chartState.viewport, pixelLineArea);
-        this.chartArea = this.chartToScreenMapper.reverseMapRectangle(this.pixelChartArea);
         this.clear();
         this.drawGrid();
+        this.drawLines();
+        this.drawSideMargins();
         this.drawOutline();
-        for (const line of this.chartState.lines) {
-            this.drawLine(line);
-        }
         this.drawAxes();
-    }
-    /**
-     * Gets the area inside the chart encompassing where lines will be drawn.
-     * @returns The chart boundary rectangle in pixel coordinates.
-     */
-    getLineAreaInPixels() {
-        const left = MARGIN + this.chartState.paddingX;
-        const top = this.chartState.paddingY;
-        const right = this.chartState.canvasWidth - this.chartState.paddingX;
-        const bottom = this.chartState.canvasHeight - MARGIN - this.chartState.paddingY;
-        return new Rectangle(new Point(left, top), new Point(right, bottom));
-    }
-    /**
-     * Gets the area of the chart where lines will be drawn.
-     * @returns The chart area rectangle in pixel coordinates.
-     */
-    getChartAreaInPixels() {
-        const left = MARGIN;
-        const top = 0;
-        const right = this.chartState.canvasWidth;
-        const bottom = this.chartState.canvasHeight - MARGIN;
-        return new Rectangle(new Point(left, top), new Point(right, bottom));
     }
     /**
      * Clear the entire rendering context.
      */
     clear() {
+        this.resetRenderingContext();
+        this.fillBackground();
+    }
+    resetRenderingContext() {
+        this.renderingContext.reset();
+        // Save the clean rendering context state so it can easily be restored later using this.resetStyle().
+        this.renderingContext.save();
+    }
+    resetStyle() {
+        this.renderingContext.restore();
+        this.renderingContext.save();
+    }
+    fillBackground() {
         this.renderingContext.fillStyle = "white";
         this.renderingContext.fillRect(0, 0, this.renderingContext.canvas.width, this.renderingContext.canvas.height);
     }
-    /**
-     * Draw the outline of the chart area. And an outline around the entire canvas.
-     */
-    drawOutline() {
-        this.renderingContext.beginPath();
-        this.renderingContext.rect(0, 0, this.chartState.canvasWidth, this.chartState.canvasHeight);
-        this.renderingContext.rect(MARGIN, 0, this.chartState.canvasWidth - MARGIN, this.chartState.canvasHeight - MARGIN);
-        this.renderingContext.stroke();
+    drawGrid() {
+        const axisTickGeneratorX = this.getTickGeneratorFromAxis(Axis.X);
+        this.drawGridLines(axisTickGeneratorX, Axis.X);
+        const axisTickGeneratorY = this.getTickGeneratorFromAxis(Axis.Y);
+        this.drawGridLines(axisTickGeneratorY, Axis.Y);
+    }
+    getTickGeneratorFromAxis(axis) {
+        return this.generateTickPositions(this.getViewportRangeAlongAxis(axis), this.getGoalNumberOfTicksAlongAxis(axis));
+    }
+    getViewportRangeAlongAxis(axis) {
+        if (axis === Axis.X) {
+            return this.getViewportRangeAlongX();
+        }
+        else if (axis === Axis.Y) {
+            return this.getViewportRangeAlongY();
+        }
+        throw new TypeError("invalid axis");
+    }
+    getViewportRangeAlongX() {
+        return new Range(this.chartState.viewport.left, this.chartState.viewport.right);
+    }
+    getViewportRangeAlongY() {
+        return new Range(this.chartState.viewport.bottom, this.chartState.viewport.top);
+    }
+    getGoalNumberOfTicksAlongAxis(axis) {
+        return (this.getPixelViewportSizeAlongAxis(axis) /
+            this.chartState.axisTickInterval);
+    }
+    getPixelViewportSizeAlongAxis(axis) {
+        if (axis === Axis.X) {
+            return this.chartState.pixelViewport.width;
+        }
+        else if (axis === Axis.Y) {
+            return this.chartState.pixelViewport.height;
+        }
+        throw new TypeError("invalid axis");
     }
     /**
-     * Draw the line connecting all points in the chart.
+     * A generator function to yield the positions of axis ticks along an axis.
+     */
+    *generateTickPositions(range, goalNumberOfTicks) {
+        const targetInterval = range.length / goalNumberOfTicks;
+        const finalInterval = this.roundToNiceTickInterval(targetInterval);
+        for (let i = Math.ceil(range.start / finalInterval) * finalInterval; i <= range.end; i += finalInterval) {
+            yield i;
+        }
+    }
+    /**
+     * Rounds a number to the nearest number matching the pattern 0.1, 0.2, 0.5, 1, 2, 5, 10, 20 etc.
+     */
+    roundToNiceTickInterval(unrounded) {
+        const possibleIntervals = this.getPossibleTickIntervals(unrounded);
+        return this.getClosestNumberInArray(unrounded, possibleIntervals);
+    }
+    getPossibleTickIntervals(unrounded) {
+        const closestPowerOfTen = this.getClosestPowerOfTen(unrounded);
+        return [closestPowerOfTen, closestPowerOfTen * 2, closestPowerOfTen * 5];
+    }
+    getClosestPowerOfTen(number) {
+        return Math.pow(10, Math.floor(Math.log10(number)));
+    }
+    getClosestNumberInArray(number, array) {
+        return array.reduce((previous, current) => {
+            if (Math.abs(number - current) < Math.abs(number - previous)) {
+                return current;
+            }
+            else {
+                return previous;
+            }
+        });
+    }
+    drawGridLines(tickPositionIterator, axis) {
+        for (let i = tickPositionIterator.next().value; i !== undefined; i = tickPositionIterator.next().value) {
+            this.drawGridLine(i, axis);
+        }
+    }
+    drawGridLine(value, axis) {
+        const pixelLine = this.getPixelGridLineSegment(value, axis);
+        this.setGridLineStyle();
+        this.drawLineSegment(pixelLine);
+    }
+    getPixelGridLineSegment(value, axis) {
+        const line = this.getGridLineSegment(value, axis);
+        return this.chartState.chartToScreenMapper.mapLineSegment(line);
+    }
+    getGridLineSegment(value, axis) {
+        if (axis === Axis.X) {
+            return this.getGridLineSegmentOnX(value);
+        }
+        else if (axis === Axis.Y) {
+            return this.getGridLineSegmentOnY(value);
+        }
+        throw new TypeError("invalid axis");
+    }
+    getGridLineSegmentOnX(value) {
+        return new LineSegment(new Point(value, this.chartState.viewport.bottom), new Point(value, this.chartState.viewport.top));
+    }
+    getGridLineSegmentOnY(value) {
+        return new LineSegment(new Point(this.chartState.viewport.left, value), new Point(this.chartState.viewport.right, value));
+    }
+    setGridLineStyle() {
+        this.resetStyle();
+        this.renderingContext.strokeStyle = "#e0e0e0";
+    }
+    drawLineSegment(line) {
+        this.drawLineBetweenPoints(line.start, line.end);
+    }
+    drawLineBetweenPoints(point1, point2) {
+        this.renderingContext.beginPath();
+        this.renderingContext.moveTo(point1.x, point1.y);
+        this.renderingContext.lineTo(point2.x, point2.y);
+        this.renderingContext.stroke();
+    }
+    drawLines() {
+        for (const line of this.chartState.lines) {
+            this.drawLine(line);
+        }
+    }
+    /**
+     * Draw a line in the chart.
      */
     drawLine(line) {
+        this.setChartLineStyle(line);
         this.renderingContext.beginPath();
         for (const point of line.points) {
-            const mappedPoint = this.chartToScreenMapper.mapPoint(point);
+            const mappedPoint = this.chartState.chartToScreenMapper.mapPoint(point);
             this.renderingContext.lineTo(mappedPoint.x, mappedPoint.y);
         }
-        this.renderingContext.save();
+        this.renderingContext.stroke();
+    }
+    setChartLineStyle(line) {
+        this.resetStyle();
         this.renderingContext.strokeStyle = line.color.toString();
         this.renderingContext.lineWidth = line.thickness;
         this.renderingContext.lineCap = "round";
         this.renderingContext.lineJoin = "round";
-        this.renderingContext.stroke();
-        this.renderingContext.restore();
     }
-    /**
-     * Draw the axes along the X and Y axis.
-     */
+    drawSideMargins() {
+        this.drawLeftMargin();
+        this.drawBottomMargin();
+    }
+    drawLeftMargin() {
+        this.resetStyle();
+        this.renderingContext.fillStyle = "white";
+        this.renderingContext.fillRect(0, 0, MARGIN, this.renderingContext.canvas.height);
+    }
+    drawBottomMargin() {
+        this.resetStyle();
+        this.renderingContext.fillStyle = "white";
+        this.renderingContext.fillRect(0, this.renderingContext.canvas.height - MARGIN, this.renderingContext.canvas.width, MARGIN);
+    }
+    drawOutline() {
+        this.resetStyle();
+        this.drawRectangle(this.chartState.pixelViewport);
+    }
+    drawRectangle(rect) {
+        this.renderingContext.beginPath();
+        this.renderingContext.rect(rect.left, rect.top, rect.width, rect.height);
+        this.renderingContext.stroke();
+    }
     drawAxes() {
-        // X-axis
-        const axisTickGeneratorX = this.generateTickPositions(new Range(this.chartArea.left, this.chartArea.right), this.pixelChartArea.width / this.chartState.axisTickInterval);
+        const axisTickGeneratorX = this.getTickGeneratorFromAxis(Axis.X);
         this.drawAxis(axisTickGeneratorX, Axis.X);
-        // Y-axis
-        const axisTickGeneratorY = this.generateTickPositions(new Range(this.chartArea.bottom, this.chartArea.top), this.pixelChartArea.height / this.chartState.axisTickInterval);
+        const axisTickGeneratorY = this.getTickGeneratorFromAxis(Axis.Y);
         this.drawAxis(axisTickGeneratorY, Axis.Y);
     }
     /**
      * Draw the axis markings and numbers along one axis.
      */
     drawAxis(tickPositionIterator, axis) {
+        this.resetStyle();
         this.setAxisLabelStyle(axis);
         for (let i = tickPositionIterator.next().value; i !== undefined; i = tickPositionIterator.next().value) {
             this.drawTickAndLabel(i, axis);
@@ -125,12 +235,12 @@ export default class LineChartRenderer {
     getTickPosition(value, axis) {
         let point;
         if (axis === Axis.X) {
-            point = new Point(value, this.chartArea.bottom);
+            point = new Point(value, this.chartState.viewport.bottom);
         }
         else {
-            point = new Point(this.chartArea.left, value);
+            point = new Point(this.chartState.viewport.left, value);
         }
-        const mappedPoint = this.chartToScreenMapper.mapPoint(point);
+        const mappedPoint = this.chartState.chartToScreenMapper.mapPoint(point);
         return mappedPoint;
     }
     drawTick(basePoint, axis) {
@@ -163,69 +273,5 @@ export default class LineChartRenderer {
     }
     drawTickLabel(position, label) {
         this.renderingContext.fillText(label, position.x, position.y);
-    }
-    drawLineBetweenPoints(point1, point2) {
-        this.renderingContext.beginPath();
-        this.renderingContext.moveTo(point1.x, point1.y);
-        this.renderingContext.lineTo(point2.x, point2.y);
-        this.renderingContext.stroke();
-    }
-    drawLineSegment(line) {
-        this.drawLineBetweenPoints(line.start, line.end);
-    }
-    /**
-     * A generator function to yield the positions of axis ticks along an axis.
-     */
-    *generateTickPositions(range, goalNumberOfTicks) {
-        const targetInterval = range.length / goalNumberOfTicks;
-        const finalInterval = this.roundTickInterval(targetInterval);
-        for (let i = Math.ceil(range.start / finalInterval) * finalInterval; i <= range.end; i += finalInterval) {
-            yield i;
-        }
-    }
-    /**
-     * Rounds a number to the nearest number matching the pattern 0.1, 0.2, 0.5, 1, 2, 5, 10, 20 etc.
-     */
-    roundTickInterval(value) {
-        const closestPowerOfTen = Math.pow(10, Math.floor(Math.log10(value)));
-        const intervals = [
-            closestPowerOfTen,
-            closestPowerOfTen * 2,
-            closestPowerOfTen * 5,
-        ];
-        const finalInterval = intervals.reduce((previous, current) => {
-            if (Math.abs(value - current) < Math.abs(value - previous)) {
-                return current;
-            }
-            else {
-                return previous;
-            }
-        });
-        return finalInterval;
-    }
-    drawGrid() {
-        const axisTickGeneratorX = this.generateTickPositions(new Range(this.chartArea.left, this.chartArea.right), this.pixelChartArea.width / this.chartState.axisTickInterval);
-        this.drawGridLines(axisTickGeneratorX, Axis.X);
-        const axisTickGeneratorY = this.generateTickPositions(new Range(this.chartArea.bottom, this.chartArea.top), this.pixelChartArea.height / this.chartState.axisTickInterval);
-        this.drawGridLines(axisTickGeneratorY, Axis.Y);
-    }
-    drawGridLines(tickPositionIterator, axis) {
-        for (let i = tickPositionIterator.next().value; i !== undefined; i = tickPositionIterator.next().value) {
-            this.drawGridLine(i, axis);
-        }
-    }
-    drawGridLine(value, axis) {
-        this.renderingContext.save();
-        this.renderingContext.strokeStyle = "#e0e0e0";
-        let line;
-        if (axis === Axis.X) {
-            line = new LineSegment(new Point(value, this.chartArea.bottom), new Point(value, this.chartArea.top));
-        }
-        else {
-            line = new LineSegment(new Point(this.chartArea.left, value), new Point(this.chartArea.right, value));
-        }
-        const mappedLine = this.chartToScreenMapper.mapLineSegment(line);
-        this.drawLineSegment(mappedLine);
-        this.renderingContext.restore();
     }
 }

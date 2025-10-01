@@ -11,6 +11,11 @@ export default class Polyline {
     private _points;
     private _color;
     private _thickness;
+    /**
+     * Creates a Polyline from an array of points.
+     * @param points The points making up the Polyline.
+     * @param options The options object defining how the Polyline is styled.
+     */
     constructor(points?: Point[], options?: PolylineOptions);
     /**
      * The points making up the polyline.

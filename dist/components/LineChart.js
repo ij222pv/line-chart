@@ -10,20 +10,24 @@ export default class LineChart extends HTMLElement {
     renderer = null;
     _width = 500;
     _height = 500;
+    /**
+     * Creates a new LineChart custom element.
+     */
     constructor() {
         super();
         this.attachShadow({ mode: "open" });
         this.shadowRoot?.appendChild(HTMLTemplate.content.cloneNode(true));
         this.shadowRoot?.appendChild(CSSTemplate.content.cloneNode(true));
+        this.updateCanvasSize();
     }
     /**
      * Handle the element being added to the DOM.
      */
     async connectedCallback() {
         this.chart = this.shadowRoot.querySelector("#chart") ?? null;
+        this.updateCanvasSize();
         if (!this.chart)
             return;
-        this.updateCanvasSize();
         this.renderingContext = this.chart.getContext("2d");
         this.renderer = new LineChartRenderer(this.renderingContext, this.state);
         this.renderer.render();
@@ -40,8 +44,8 @@ export default class LineChart extends HTMLElement {
             return;
         }
         switch (name) {
-            case "axisInterval":
-                this.axisInterval = newValue;
+            case "axisTickInterval":
+                this.axisTickInterval = newValue;
                 break;
             case "width":
                 this.width = newValue;
@@ -55,7 +59,7 @@ export default class LineChart extends HTMLElement {
      * A list of attributes for the custom element.
      */
     static get observedAttributes() {
-        return ["axisInterval", "width", "height"];
+        return ["axisTickInterval", "width", "height"];
     }
     /**
      * Adds a line to the chart.
@@ -93,7 +97,7 @@ export default class LineChart extends HTMLElement {
      * Sets the interval in pixels between axis ticks.
      * @param interval The target interval between ticks.
      */
-    set axisInterval(interval) {
+    set axisTickInterval(interval) {
         this.state.axisTickInterval = Number(interval);
         this.renderer?.render();
     }
@@ -126,11 +130,11 @@ export default class LineChart extends HTMLElement {
         this.updateCanvasSize();
     }
     updateCanvasSize() {
+        this.state.canvasWidth = this.width;
+        this.state.canvasHeight = this.height;
         if (this.chart) {
             this.chart.width = this.width;
             this.chart.height = this.height;
-            this.state.canvasWidth = this.width;
-            this.state.canvasHeight = this.height;
             this.renderer?.render();
         }
     }

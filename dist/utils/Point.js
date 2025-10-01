@@ -1,6 +1,11 @@
 export default class Point {
     _x = 0;
     _y = 0;
+    /**
+     * Creates a Point in 2D space.
+     * @param x The x coordinate of the point.
+     * @param y The y coordinate of the point.
+     */
     constructor(x, y) {
         this.validateNumber(x);
         this.validateNumber(y);

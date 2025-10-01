@@ -4,6 +4,11 @@ export default class Rectangle {
     _left = 0;
     _right = 0;
     _bottom = 0;
+    /**
+     * Creates a Rectangle defined by two points.
+     * @param topLeftPoint The top left point of the rectangle.
+     * @param bottomRightPoint The bottom right point of the rectangle.
+     */
     constructor(topLeftPoint, bottomRightPoint) {
         this.validatePoint(topLeftPoint);
         this.validatePoint(bottomRightPoint);
