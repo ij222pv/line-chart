@@ -12,6 +12,7 @@ export default class LineChartState extends ChartState {
   private _paddingX: number = 0;
   private _paddingY: number = 0;
   private _viewport: Rectangle | null = null;
+  private _boundingBoxOfLines: Rectangle = this.calculateBoundingBoxOfLines();
 
   constructor() {
     super();
@@ -22,17 +23,15 @@ export default class LineChartState extends ChartState {
    */
   public addLine(line: Polyline): void {
     this._lines.push(line);
+    this._boundingBoxOfLines = this.calculateBoundingBoxOfLines();
   }
 
   public clearLines(): void {
     this._lines = [];
+    this._boundingBoxOfLines = this.calculateBoundingBoxOfLines();
   }
 
-  public get lines(): Polyline[] {
-    return this._lines;
-  }
-
-  public get boundingBoxOfLines(): Rectangle {
+  private calculateBoundingBoxOfLines(): Rectangle {
     let topLeft = new Point(Infinity, -Infinity);
     let bottomRight = new Point(-Infinity, Infinity);
 
@@ -50,22 +49,32 @@ export default class LineChartState extends ChartState {
     return new Rectangle(topLeft, bottomRight);
   }
 
+  public get lines(): Polyline[] {
+    return this._lines;
+  }
+
+  public get boundingBoxOfLines(): Rectangle {
+    return this._boundingBoxOfLines;
+  }
+
   public set viewport(viewport: Rectangle) {
     this._viewport = viewport;
   }
 
   public get viewport(): Rectangle {
     if (this._viewport === null) {
-      return this.boundingBoxOfLines;
+      this.autoFit();
     }
 
-    return this._viewport;
+    return this._viewport!;
   }
 
   public autoFit(options: { paddingX?: number; paddingY?: number } = {}): void {
     this.paddingX = options.paddingX ?? 0;
     this.paddingY = options.paddingY ?? 0;
-    this.viewport = this.boundingBoxOfLines;
+    this.viewport = this.chartToScreenMapper.reverseMapRectangle(
+      this.pixelViewport,
+    );
   }
 
   public set axisTickInterval(value: number) {
@@ -121,6 +130,9 @@ export default class LineChartState extends ChartState {
   }
 
   public get chartToScreenMapper(): RectangleMapper {
-    return new RectangleMapper(this.viewport, this.pixelViewportMinusPadding);
+    return new RectangleMapper(
+      this.boundingBoxOfLines,
+      this.pixelViewportMinusPadding,
+    );
   }
 }

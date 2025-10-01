@@ -25,6 +25,7 @@ export default class LineChart extends HTMLElement {
     this.attachShadow({ mode: "open" });
     this.shadowRoot?.appendChild(HTMLTemplate.content.cloneNode(true));
     this.shadowRoot?.appendChild(CSSTemplate.content.cloneNode(true));
+    this.updateCanvasSize();
   }
 
   /**
@@ -32,10 +33,9 @@ export default class LineChart extends HTMLElement {
    */
   async connectedCallback(): Promise<void> {
     this.chart = this.shadowRoot!.querySelector("#chart") ?? null;
+    this.updateCanvasSize();
 
     if (!this.chart) return;
-
-    this.updateCanvasSize();
 
     this.renderingContext = this.chart.getContext("2d");
 
@@ -160,11 +160,11 @@ export default class LineChart extends HTMLElement {
   }
 
   private updateCanvasSize(): void {
+    this.state.canvasWidth = this.width;
+    this.state.canvasHeight = this.height;
     if (this.chart) {
       this.chart.width = this.width;
       this.chart.height = this.height;
-      this.state.canvasWidth = this.width;
-      this.state.canvasHeight = this.height;
       this.renderer?.render();
     }
   }
