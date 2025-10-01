@@ -31,6 +31,22 @@ export default class LineChartRenderer implements Renderer {
    * Clear the entire rendering context.
    */
   private clear(): void {
+    this.resetRenderingContext();
+    this.fillBackground();
+  }
+
+  private resetRenderingContext(): void {
+    this.renderingContext.reset();
+    // Save the clean rendering context state so it can easily be restored later using this.resetStyle().
+    this.renderingContext.save();
+  }
+
+  private resetStyle(): void {
+    this.renderingContext.restore();
+    this.renderingContext.save();
+  }
+
+  private fillBackground(): void {
     this.renderingContext.fillStyle = "white";
     this.renderingContext.fillRect(
       0,
@@ -114,9 +130,6 @@ export default class LineChartRenderer implements Renderer {
   }
 
   private drawGridLine(value: number, axis: Axis): void {
-    this.renderingContext.save();
-    this.renderingContext.strokeStyle = "#e0e0e0";
-
     let line: LineSegment;
     if (axis === Axis.X) {
       line = new LineSegment(
@@ -131,9 +144,13 @@ export default class LineChartRenderer implements Renderer {
     }
     const mappedLine =
       this.chartState.chartToScreenMapper!.mapLineSegment(line);
+    this.setGridLineStyle();
     this.drawLineSegment(mappedLine);
+  }
 
-    this.renderingContext.restore();
+  private setGridLineStyle(): void {
+    this.resetStyle();
+    this.renderingContext.strokeStyle = "#e0e0e0";
   }
 
   private drawLineSegment(line: LineSegment): void {
@@ -158,6 +175,7 @@ export default class LineChartRenderer implements Renderer {
       this.renderingContext.canvas.width - MARGIN,
       this.renderingContext.canvas.height - MARGIN,
     );
+    this.resetStyle();
     this.renderingContext.stroke();
   }
 
@@ -177,13 +195,12 @@ export default class LineChartRenderer implements Renderer {
       this.renderingContext.lineTo(mappedPoint.x, mappedPoint.y);
     }
 
-    this.renderingContext.save();
+    this.resetStyle();
     this.renderingContext.strokeStyle = line.color.toString();
     this.renderingContext.lineWidth = line.thickness;
     this.renderingContext.lineCap = "round";
     this.renderingContext.lineJoin = "round";
     this.renderingContext.stroke();
-    this.renderingContext.restore();
   }
 
   /**
@@ -215,6 +232,7 @@ export default class LineChartRenderer implements Renderer {
    * Draw the axis markings and numbers along one axis.
    */
   private drawAxis(tickPositionIterator: Iterator<number>, axis: Axis): void {
+    this.resetStyle();
     this.setAxisLabelStyle(axis);
 
     for (
