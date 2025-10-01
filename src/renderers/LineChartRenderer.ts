@@ -57,23 +57,57 @@ export default class LineChartRenderer implements Renderer {
   }
 
   private drawGrid(): void {
-    const axisTickGeneratorX = this.generateTickPositions(
-      new Range(
-        this.chartState.viewport!.left,
-        this.chartState.viewport!.right,
-      ),
-      this.chartState.pixelViewport!.width / this.chartState.axisTickInterval,
-    );
+    const axisTickGeneratorX = this.getTickGeneratorFromAxis(Axis.X);
     this.drawGridLines(axisTickGeneratorX, Axis.X);
 
-    const axisTickGeneratorY = this.generateTickPositions(
-      new Range(
-        this.chartState.viewport!.bottom,
-        this.chartState.viewport!.top,
-      ),
-      this.chartState.pixelViewport!.height / this.chartState.axisTickInterval,
-    );
+    const axisTickGeneratorY = this.getTickGeneratorFromAxis(Axis.Y);
     this.drawGridLines(axisTickGeneratorY, Axis.Y);
+  }
+
+  private getTickGeneratorFromAxis(axis: Axis): Iterator<number> {
+    return this.generateTickPositions(
+      this.getViewportRangeAlongAxis(axis),
+      this.getGoalNumberOfTicksAlongAxis(axis),
+    );
+  }
+
+  private getViewportRangeAlongAxis(axis: Axis): Range {
+    if (axis === Axis.X) {
+      return this.getViewportRangeAlongX();
+    } else if (axis === Axis.Y) {
+      return this.getViewportRangeAlongY();
+    }
+    throw new TypeError("invalid axis");
+  }
+
+  private getViewportRangeAlongX(): Range {
+    return new Range(
+      this.chartState.viewport!.left,
+      this.chartState.viewport!.right,
+    );
+  }
+
+  private getViewportRangeAlongY(): Range {
+    return new Range(
+      this.chartState.viewport!.bottom,
+      this.chartState.viewport!.top,
+    );
+  }
+
+  private getGoalNumberOfTicksAlongAxis(axis: Axis): number {
+    return (
+      this.getPixelViewportSizeAlongAxis(axis) /
+      this.chartState.axisTickInterval
+    );
+  }
+
+  private getPixelViewportSizeAlongAxis(axis: Axis): number {
+    if (axis === Axis.X) {
+      return this.chartState.pixelViewport!.width;
+    } else if (axis === Axis.Y) {
+      return this.chartState.pixelViewport!.height;
+    }
+    throw new TypeError("invalid axis");
   }
 
   /**
@@ -84,7 +118,7 @@ export default class LineChartRenderer implements Renderer {
     goalNumberOfTicks: number,
   ): Generator<number> {
     const targetInterval = range.length / goalNumberOfTicks;
-    const finalInterval = this.roundTickInterval(targetInterval);
+    const finalInterval = this.roundToNiceTickInterval(targetInterval);
 
     for (
       let i = Math.ceil(range.start / finalInterval) * finalInterval;
@@ -98,22 +132,28 @@ export default class LineChartRenderer implements Renderer {
   /**
    * Rounds a number to the nearest number matching the pattern 0.1, 0.2, 0.5, 1, 2, 5, 10, 20 etc.
    */
-  private roundTickInterval(value: number): number {
-    const closestPowerOfTen = Math.pow(10, Math.floor(Math.log10(value)));
-    const intervals = [
+  private roundToNiceTickInterval(unrounded: number): number {
+    const closestPowerOfTen = this.getClosestPowerOfTen(unrounded);
+    const possibleIntervals = [
       closestPowerOfTen,
       closestPowerOfTen * 2,
       closestPowerOfTen * 5,
     ];
-    const finalInterval = intervals.reduce((previous, current) => {
-      if (Math.abs(value - current) < Math.abs(value - previous)) {
+    return this.getClosestNumberInArray(unrounded, possibleIntervals);
+  }
+
+  private getClosestPowerOfTen(number: number): number {
+    return Math.pow(10, Math.floor(Math.log10(number)));
+  }
+
+  private getClosestNumberInArray(number: number, array: number[]): number {
+    return array.reduce((previous, current) => {
+      if (Math.abs(number - current) < Math.abs(number - previous)) {
         return current;
       } else {
         return previous;
       }
     });
-
-    return finalInterval;
   }
 
   private drawGridLines(
@@ -189,18 +229,21 @@ export default class LineChartRenderer implements Renderer {
    * Draw the line connecting all points in the chart.
    */
   private drawLine(line: Polyline): void {
+    this.setChartLineStyle(line);
     this.renderingContext.beginPath();
     for (const point of line.points) {
       const mappedPoint = this.chartState.chartToScreenMapper!.mapPoint(point);
       this.renderingContext.lineTo(mappedPoint.x, mappedPoint.y);
     }
+    this.renderingContext.stroke();
+  }
 
+  private setChartLineStyle(line: Polyline): void {
     this.resetStyle();
     this.renderingContext.strokeStyle = line.color.toString();
     this.renderingContext.lineWidth = line.thickness;
     this.renderingContext.lineCap = "round";
     this.renderingContext.lineJoin = "round";
-    this.renderingContext.stroke();
   }
 
   /**
