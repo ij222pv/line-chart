@@ -153,12 +153,6 @@ export default class LineChartRenderer implements Renderer {
   private drawOutline(): void {
     this.renderingContext.beginPath();
     this.renderingContext.rect(
-      0,
-      0,
-      this.renderingContext.canvas.width,
-      this.renderingContext.canvas.height,
-    );
-    this.renderingContext.rect(
       MARGIN,
       0,
       this.renderingContext.canvas.width - MARGIN,
