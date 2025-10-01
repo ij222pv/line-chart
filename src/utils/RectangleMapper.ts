@@ -22,40 +22,52 @@ export default class RectangleMapper {
    * rectangle.
    */
   mapPoint(point: Point): Point {
-    const relativeToSource = new Point(
-      point.x - this.source.left,
-      point.y - this.source.top,
-    );
-    const scaledToTarget = new Point(
-      (relativeToSource.x / this.source.width) * this.target.width,
-      (relativeToSource.y / this.source.height) * this.target.height,
-    );
-    const mappedToTarget = new Point(
-      scaledToTarget.x + this.target.left,
-      scaledToTarget.y + this.target.top,
-    );
+    const relativeToSource = this.translatePointFromSource(point);
+    const scaledToTarget = this.scalePointToTarget(relativeToSource);
+    const mappedToTarget = this.translatePointToTarget(scaledToTarget);
 
     return mappedToTarget;
+  }
+
+  translatePointFromSource(point: Point): Point {
+    return new Point(point.x - this.source.left, point.y - this.source.top);
+  }
+
+  scalePointToTarget(point: Point): Point {
+    return new Point(
+      (point.x / this.source.width) * this.target.width,
+      (point.y / this.source.height) * this.target.height,
+    );
+  }
+
+  translatePointToTarget(point: Point): Point {
+    return new Point(point.x + this.target.left, point.y + this.target.top);
   }
 
   /**
    * Maps a point relative to the target rectangle back to the source rectangle.
    */
   reverseMapPoint(point: Point): Point {
-    const relativeToSource = new Point(
-      point.x - this.target.left,
-      point.y - this.target.top,
-    );
-    const scaledToTarget = new Point(
-      (relativeToSource.x / this.target.width) * this.source.width,
-      (relativeToSource.y / this.target.height) * this.source.height,
-    );
-    const mappedToTarget = new Point(
-      scaledToTarget.x + this.source.left,
-      scaledToTarget.y + this.source.top,
-    );
+    const relativeToTarget = this.translatePointFromTarget(point);
+    const scaledToSource = this.scalePointToSource(relativeToTarget);
+    const mappedToSource = this.translatePointToSource(scaledToSource);
 
-    return mappedToTarget;
+    return mappedToSource;
+  }
+
+  translatePointFromTarget(point: Point): Point {
+    return new Point(point.x - this.target.left, point.y - this.target.top);
+  }
+
+  scalePointToSource(point: Point): Point {
+    return new Point(
+      (point.x / this.target.width) * this.source.width,
+      (point.y / this.target.height) * this.source.height,
+    );
+  }
+
+  translatePointToSource(point: Point): Point {
+    return new Point(point.x + this.source.left, point.y + this.source.top);
   }
 
   /**
