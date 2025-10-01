@@ -3,6 +3,8 @@
 ![Version](https://img.shields.io/github/package-json/v/ij222pv/line-chart)
 ![License](https://img.shields.io/github/license/ij222pv/line-chart)
 
+[Link to demo app](https://github.com/ij222pv/line-chart-test)
+
 ## Installation
 
 You can install the library using npm:
