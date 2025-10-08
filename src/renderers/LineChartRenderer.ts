@@ -9,6 +9,7 @@ import type Renderer from "./Renderer";
 const MARGIN = 35;
 const TICK_LENGTH = MARGIN * 0.2;
 const LABEL_OFFSET = TICK_LENGTH + MARGIN * 0.1;
+const LABEL_FONT_FAMILY = "Arial";
 enum Axis {
   X,
   Y,
@@ -298,30 +299,40 @@ export default class LineChartRenderer implements Renderer {
    * Draw the axis markings and numbers along one axis.
    */
   private drawAxis(tickPositionIterator: Iterator<number>, axis: Axis): void {
-    this.resetStyle();
-    this.setAxisLabelStyle(axis);
-
     for (
       let i = tickPositionIterator.next().value;
       i !== undefined;
       i = tickPositionIterator.next().value
     ) {
+      this.resetStyle();
       this.drawTickAndLabel(i, axis);
     }
-  }
-
-  private setAxisLabelStyle(axis: Axis): void {
-    this.renderingContext.fillStyle = "black";
-    this.renderingContext.font = "12px Arial";
-    this.renderingContext.textAlign = axis === Axis.X ? "center" : "right";
-    this.renderingContext.textBaseline = axis === Axis.X ? "top" : "middle";
   }
 
   private drawTickAndLabel(value: number, axis: Axis): void {
     const tickPosition = this.getTickPosition(value, axis);
     this.drawTick(tickPosition, axis);
     const labelPosition = this.getTickLabelPosition(tickPosition, axis);
-    this.drawTickLabel(labelPosition, this.numberToString(value));
+    const label: string = this.numberToString(value);
+    this.setAxisLabelStyle(label, axis);
+    this.drawTickLabel(labelPosition, label);
+  }
+
+  private setAxisLabelStyle(label: string, axis: Axis): void {
+    this.setLabelFont(label, MARGIN - LABEL_OFFSET);
+    this.renderingContext.fillStyle = "black";
+    this.renderingContext.textAlign = axis === Axis.X ? "center" : "right";
+    this.renderingContext.textBaseline = axis === Axis.X ? "top" : "middle";
+  }
+
+  private setLabelFont(text: string, maxWidth: number): void {
+    let fontSize = 13; // The biggest font size to try.
+    this.renderingContext.font = `${fontSize}px ${LABEL_FONT_FAMILY}`;
+
+    while (this.renderingContext.measureText(text).width > maxWidth) {
+      fontSize -= 0.1;
+      this.renderingContext.font = `${fontSize}px ${LABEL_FONT_FAMILY}`;
+    }
   }
 
   private getTickPosition(value: number, axis: Axis): Point {

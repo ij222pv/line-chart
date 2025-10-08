@@ -55,8 +55,9 @@ export default class LineChartRenderer implements Renderer {
      * Draw the axis markings and numbers along one axis.
      */
     private drawAxis;
-    private setAxisLabelStyle;
     private drawTickAndLabel;
+    private setAxisLabelStyle;
+    private setLabelFont;
     private getTickPosition;
     private drawTick;
     private getTickLabelPosition;

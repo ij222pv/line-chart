@@ -4,6 +4,7 @@ import Range from "../utils/Range";
 const MARGIN = 35;
 const TICK_LENGTH = MARGIN * 0.2;
 const LABEL_OFFSET = TICK_LENGTH + MARGIN * 0.1;
+const LABEL_FONT_FAMILY = "Arial";
 var Axis;
 (function (Axis) {
     Axis[Axis["X"] = 0] = "X";
@@ -214,23 +215,32 @@ export default class LineChartRenderer {
      * Draw the axis markings and numbers along one axis.
      */
     drawAxis(tickPositionIterator, axis) {
-        this.resetStyle();
-        this.setAxisLabelStyle(axis);
         for (let i = tickPositionIterator.next().value; i !== undefined; i = tickPositionIterator.next().value) {
+            this.resetStyle();
             this.drawTickAndLabel(i, axis);
         }
-    }
-    setAxisLabelStyle(axis) {
-        this.renderingContext.fillStyle = "black";
-        this.renderingContext.font = "12px Arial";
-        this.renderingContext.textAlign = axis === Axis.X ? "center" : "right";
-        this.renderingContext.textBaseline = axis === Axis.X ? "top" : "middle";
     }
     drawTickAndLabel(value, axis) {
         const tickPosition = this.getTickPosition(value, axis);
         this.drawTick(tickPosition, axis);
         const labelPosition = this.getTickLabelPosition(tickPosition, axis);
-        this.drawTickLabel(labelPosition, this.numberToString(value));
+        const label = this.numberToString(value);
+        this.setAxisLabelStyle(label, axis);
+        this.drawTickLabel(labelPosition, label);
+    }
+    setAxisLabelStyle(label, axis) {
+        this.setLabelFont(label, MARGIN - LABEL_OFFSET);
+        this.renderingContext.fillStyle = "black";
+        this.renderingContext.textAlign = axis === Axis.X ? "center" : "right";
+        this.renderingContext.textBaseline = axis === Axis.X ? "top" : "middle";
+    }
+    setLabelFont(text, maxWidth) {
+        let fontSize = 13; // The biggest font size to try.
+        this.renderingContext.font = `${fontSize}px ${LABEL_FONT_FAMILY}`;
+        while (this.renderingContext.measureText(text).width > maxWidth) {
+            fontSize -= 0.1;
+            this.renderingContext.font = `${fontSize}px ${LABEL_FONT_FAMILY}`;
+        }
     }
     getTickPosition(value, axis) {
         let point;
