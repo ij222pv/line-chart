@@ -1,13 +1,14 @@
 import type LineChartState from "../states/LineChartState";
 import type Renderer from "./Renderer";
-export default class LineChartRenderer implements Renderer {
+export default class LineRenderer implements Renderer {
     private renderingContext;
     private chartState;
     private readonly renderingUtilities;
     constructor(renderingContext: CanvasRenderingContext2D, chartState: LineChartState);
     render(): void;
     /**
-     * Clear the entire rendering context.
+     * Draw a line in the chart.
      */
-    private clear;
+    private drawLine;
+    private setChartLineStyle;
 }
