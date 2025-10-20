@@ -1,6 +1,6 @@
 {
   "name": "line-chart",
-  "version": "2.0.2",
+  "version": "2.0.3",
   "description": "This module provides a line-chart web component implemented in TypeScript.",
   "license": "MIT",
   "author": "Isak Weckstén <ij222pv@student.lnu.se>",
