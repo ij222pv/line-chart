@@ -1,6 +1,6 @@
 import { Axis } from "../Axis";
 import type LineChartState from "../states/LineChartState";
-import Range from "../utils/Range";
+import Range from "../model/Range";
 import TickGenerator from "./TickGenerator";
 
 export default class AxisTickGenerator {

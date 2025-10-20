@@ -1,6 +1,6 @@
-import Point from "../utils/Point";
-import Rectangle from "../utils/Rectangle";
-import RectangleMapper from "../utils/RectangleMapper";
+import Point from "../model/Point";
+import Rectangle from "../model/Rectangle";
+import RectangleMapper from "../model/RectangleMapper";
 import ChartState from "./ChartState";
 const MARGIN = 35;
 export default class LineChartState extends ChartState {

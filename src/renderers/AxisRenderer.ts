@@ -6,7 +6,7 @@ import {
   TICK_LENGTH,
 } from "../constants";
 import type LineChartState from "../states/LineChartState";
-import Point from "../utils/Point";
+import Point from "../model/Point";
 import AxisTickGenerator from "./AxisTickGenerator";
 import type Renderer from "./Renderer";
 import RenderingUtilities from "./RenderingUtilities";

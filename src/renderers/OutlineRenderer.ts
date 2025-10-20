@@ -1,5 +1,5 @@
 import type LineChartState from "../states/LineChartState";
-import type Rectangle from "../utils/Rectangle";
+import type Rectangle from "../model/Rectangle";
 import type Renderer from "./Renderer";
 import RenderingUtilities from "./RenderingUtilities";
 

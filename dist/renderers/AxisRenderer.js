@@ -1,6 +1,6 @@
 import { Axis } from "../Axis";
 import { LABEL_FONT_FAMILY, LABEL_OFFSET, MARGIN, TICK_LENGTH, } from "../constants";
-import Point from "../utils/Point";
+import Point from "../model/Point";
 import AxisTickGenerator from "./AxisTickGenerator";
 import RenderingUtilities from "./RenderingUtilities";
 export default class AxisRenderer {

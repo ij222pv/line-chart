@@ -1,4 +1,4 @@
-import type Range from "../utils/Range";
+import type Range from "../model/Range";
 
 export default class TickGenerator {
   /**

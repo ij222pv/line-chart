@@ -1,4 +1,4 @@
-import type Range from "../utils/Range";
+import type Range from "../model/Range";
 export default class TickGenerator {
     /**
      * A generator function to yield the positions of axis ticks along an axis.

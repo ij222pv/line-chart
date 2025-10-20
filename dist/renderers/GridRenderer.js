@@ -1,6 +1,6 @@
 import { Axis } from "../Axis";
-import LineSegment from "../utils/LineSegment";
-import Point from "../utils/Point";
+import LineSegment from "../model/LineSegment";
+import Point from "../model/Point";
 import AxisTickGenerator from "./AxisTickGenerator";
 import RenderingUtilities from "./RenderingUtilities";
 export default class GridRenderer {

@@ -1,6 +1,6 @@
-import type Polyline from "../utils/Polyline";
-import Rectangle from "../utils/Rectangle";
-import RectangleMapper from "../utils/RectangleMapper";
+import type Polyline from "../model/Polyline";
+import Rectangle from "../model/Rectangle";
+import RectangleMapper from "../model/RectangleMapper";
 import ChartState from "./ChartState";
 export default class LineChartState extends ChartState {
     private _lines;

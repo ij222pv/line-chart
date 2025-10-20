@@ -1,4 +1,4 @@
-import Color from "../utils/Color";
+import Color from "../model/Color";
 import AxisRenderer from "./AxisRenderer";
 import GridRenderer from "./GridRenderer";
 import LineRenderer from "./LineRenderer";

@@ -1,7 +1,7 @@
 import { Axis } from "../Axis";
 import type LineChartState from "../states/LineChartState";
-import LineSegment from "../utils/LineSegment";
-import Point from "../utils/Point";
+import LineSegment from "../model/LineSegment";
+import Point from "../model/Point";
 import AxisTickGenerator from "./AxisTickGenerator";
 import type Renderer from "./Renderer";
 import RenderingUtilities from "./RenderingUtilities";

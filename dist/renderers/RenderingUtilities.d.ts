@@ -1,5 +1,5 @@
-import type Color from "../utils/Color";
-import type Point from "../utils/Point";
+import type Color from "../model/Color";
+import type Point from "../model/Point";
 export default class RenderingUtilities {
     private renderingContext;
     constructor(renderingContext: CanvasRenderingContext2D);

@@ -1,5 +1,5 @@
-import type Polyline from "../utils/Polyline.js";
-import type Rectangle from "../utils/Rectangle.js";
+import type Polyline from "../model/Polyline.js";
+import type Rectangle from "../model/Rectangle.js";
 export default class LineChart extends HTMLElement {
     private chart;
     private renderingContext;

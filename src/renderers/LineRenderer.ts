@@ -1,5 +1,5 @@
 import type LineChartState from "../states/LineChartState";
-import type Polyline from "../utils/Polyline";
+import type Polyline from "../model/Polyline";
 import type Renderer from "./Renderer";
 import RenderingUtilities from "./RenderingUtilities";
 
