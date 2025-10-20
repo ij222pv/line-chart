@@ -8,9 +8,7 @@ All the test cases and their expected results are documented below.
 
 ## Tests
 
-### TC1
-
-**Description:** Render a simple line chart with default options.
+### TC1 - Simple line chart
 
 **Expected result**:
 
@@ -18,9 +16,7 @@ The result should look like in the screenshot. The entire chart line should be f
 
 ![Test case 1](.readme/tests/tc1.png)
 
-### TC2
-
-**Description:** Render a line chart that is auto-fitted with a padding.
+### TC2 - Auto-fitted line chart with padding
 
 **Expected result**:
 
@@ -28,9 +24,7 @@ In addition to TC1, there should be a padding of 75 pixels between the chart lin
 
 ![Test case 2](.readme/tests/tc2.png)
 
-### TC3
-
-**Description:** Render a line chart with custom colors and line thickness.
+### TC3 - Custom line color and thickness
 
 **Expected result**:
 
@@ -38,9 +32,7 @@ The line should have a red color and a thickness of 10 pixels.
 
 ![Test case 3](.readme/tests/tc3.png)
 
-### TC4
-
-**Description:** Render a line chart with multiple lines with different color and thickness.
+### TC4 - Multiple lines with different colors and thicknesses
 
 **Expected result**:
 
@@ -48,9 +40,7 @@ There should be two lines in the chart, one red with a thickness of 10 pixels, a
 
 ![Test case 4](.readme/tests/tc4.png)
 
-### TC5
-
-**Description:** Ticks along the x and y axes should always be placed at "nice" intervals. "nice" intervals are a number in the pattern 0.1, 0.2, 0.5, 1, 2, 5, 10, 20, 50, etc.
+### TC5 - Auto-fitted line chart with nice axis tick intervals
 
 **Steps**:
 
@@ -65,8 +55,6 @@ Note how the interval between ticks on the x-axis is 2, and the interval between
 ![Test case 5](.readme/tests/tc5.png)
 
 ### TC6 - Custom axis tick interval
-
-**Description:** A chart with a custom axis tick interval of 200 pixels.
 
 **Expected result**:
 
@@ -90,12 +78,12 @@ Chart viewport should cover a square with the bottom left corner at (-5, -5) and
 
 **Version:** 2.0.0
 
-| What is being tested? | How is it being tested?                                         | Result |
-| --------------------- | --------------------------------------------------------------- | ------ |
-| TC1                   | Visually inspecting the rendered chart.                         | Pass   |
-| TC2                   | Visually inspecting the rendered chart.                         | Pass   |
-| TC3                   | Visually inspecting the rendered chart.                         | Pass   |
-| TC4                   | Visually inspecting the rendered chart.                         | Pass   |
-| TC5                   | Visually inspecting the rendered chart while moving the slider. | Pass   |
-| TC6                   | Visually inspecting the rendered chart.                         | Pass   |
-| TC7                   | Visually inspecting the rendered chart.                         | Pass   |
+| What is being tested?                                      | How is it being tested?                                         | Result |
+| ---------------------------------------------------------- | --------------------------------------------------------------- | ------ |
+| TC1 - Simple line chart                                    | Visually inspecting the rendered chart.                         | Pass   |
+| TC2 - Auto-fitted line chart with padding                  | Visually inspecting the rendered chart.                         | Pass   |
+| TC3 - Custom line color and thickness                      | Visually inspecting the rendered chart.                         | Pass   |
+| TC4 - Multiple lines with different colors and thicknesses | Visually inspecting the rendered chart.                         | Pass   |
+| TC5 - Auto-fitted line chart with nice axis tick intervals | Visually inspecting the rendered chart while moving the slider. | Pass   |
+| TC6 - Custom axis tick interval                            | Visually inspecting the rendered chart.                         | Pass   |
+| TC7 - Custom viewport                                      | Visually inspecting the rendered chart.                         | Pass   |
