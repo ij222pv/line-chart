@@ -1,13 +1,10 @@
 import type LineChartState from "../states/LineChartState";
 import type Renderer from "./Renderer";
-export default class LineChartRenderer implements Renderer {
+export default class OutlineRenderer implements Renderer {
     private renderingContext;
     private chartState;
     private readonly renderingUtilities;
     constructor(renderingContext: CanvasRenderingContext2D, chartState: LineChartState);
     render(): void;
-    /**
-     * Clear the entire rendering context.
-     */
-    private clear;
+    private drawRectangle;
 }

@@ -1,6 +1,6 @@
 {
   "name": "line-chart",
-  "version": "2.0.1",
+  "version": "2.0.3",
   "description": "This module provides a line-chart web component implemented in TypeScript.",
   "license": "MIT",
   "author": "Isak Weckstén <ij222pv@student.lnu.se>",
@@ -10,15 +10,13 @@
   "scripts": {
     "build": "tsc"
   },
-  "dependencies": {
-    "typescript": "^5.9.2"
-  },
   "devDependencies": {
     "@eslint/js": "^9.36.0",
     "eslint": "^9.36.0",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-prettier": "^5.5.4",
     "globals": "^16.4.0",
+    "typescript": "^5.9.3",
     "typescript-eslint": "^8.44.1"
   }
 }

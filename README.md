@@ -5,6 +5,8 @@
 
 [Link to demo app](https://github.com/ij222pv/line-chart-test)
 
+This is a JavaScript module for creating simple line charts in web applications. It allows you to create line charts with multiple lines, customize line colors and thicknesses, and automatically adjust the viewport to fit the data.
+
 ## Installation
 
 You can install the library using npm:
@@ -44,19 +46,27 @@ document.body.appendChild(lineChart);
 
 ## Public API
 ### **LineChart**
-**addLine(line: Polyline): void**
+```typescript
+addLine(line: Polyline): void
+```
 
 Adds a line to the chart.
 
-**clearLines(): void**
+```typescript
+clearLines(): void
+```
 
 Removes all lines from the chart.
 
-**setViewport(viewport: Rectangle)**
+```typescript
+setViewport(viewport: Rectangle)
+```
 
 Sets the viewport of the chart to the specified rectangle, in chart coordinates.
 
-**autoFitViewport(options: Object): void**
+```typescript
+autoFitViewport(options: Object): void
+```
 
 Automatically adjusts the viewport to fit all lines.
 
@@ -66,20 +76,28 @@ The `options` object may contain:
 
 `paddingY: number` - The padding in pixels on the y-axis between chart lines and chart edge.
 
-**axisTickInterval**
+```typescript
+axisTickInterval
+```
 
 The target interval in pixels between axis ticks. The actual interval will differ from this value to ensure that ticks are at "nice" values.
 
-**width**
+```typescript
+width
+```
 
 The width of the chart canvas in pixels. Defaults to 500.
 
-**height**
+```typescript
+height
+```
 
 The height of the chart canvas in pixels. Defaults to 500.
 
 ### **Polyline**
-**constructor(points: Point[], options?: Object)**
+```typescript
+constructor(points: Point[], options?: Object)
+```
 
 The `options` object may contain:
 
@@ -87,64 +105,102 @@ The `options` object may contain:
 
 `thickness: number` - The thickness of the line in pixels. The default is 1.
 
-**points** {readonly}
+```typescript
+points {readonly}
+```
 
 An array of Point objects representing the vertices of the polyline.
 
-**color** {readonly}
+```typescript
+color {readonly}
+```
 
 The color of the line.
 
-**thickness** {readonly}
+```typescript
+thickness {readonly}
+```
 
 The thickness of the line in pixels.
 
 ### **Point**
-**constructor(x: number, y: number)**
+```typescript
+constructor(x: number, y: number)
+```
 
 Creates a point with the specified x and y coordinates.
 
-**x** {readonly}
+```typescript
+x {readonly}
+```
 
 The x coordinate of the point.
 
-**y** {readonly}
+```typescript
+y {readonly}
+```
 
 The y coordinate of the point.
 
 ### **Color**
-**constructor(cssColor: String)**
+```typescript
+constructor(cssColor: String)
+```
 
 `cssColor` is a CSS color string such as "red" or "hsl(200, 100%, 50%)". The default is "black";
 
 More examples are available at https://developer.mozilla.org/en-US/docs/Web/CSS/color_value
 
-**toString(): String**
+```typescript
+toString(): String
+```
 
 Get the color as a CSS-compatible string.
 
 ### **Rectangle**
-**constructor(topLeftPoint: Point, bottomRightPoint: Point)**
+```typescript
+constructor(topLeftPoint: Point, bottomRightPoint: Point)
+```
 
-**topLeft: Point** {readonly}
+```typescript
+topLeft: Point {readonly}
+```
 
-**topRight: Point** {readonly}
+```typescript
+topRight: Point {readonly}
+```
 
-**bottomRight: Point** {readonly}
+```typescript
+bottomRight: Point {readonly}
+```
 
-**bottomLeft: Point** {readonly}
+```typescript
+bottomLeft: Point {readonly}
+```
 
-**top: number** {readonly}
+```typescript
+top: number {readonly}
+```
 
-**right: number** {readonly}
+```typescript
+right: number {readonly}
+```
 
-**bottom: number** {readonly}
+```typescript
+bottom: number {readonly}
+```
 
-**left: number** {readonly}
+```typescript
+left: number {readonly}
+```
 
-**width: number** {readonly}
+```typescript
+width: number {readonly}
+```
 
-**height: number** {readonly}
+```typescript
+height: number {readonly}
+```
 
 ## Contributing
 

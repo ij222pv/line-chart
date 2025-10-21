@@ -2,9 +2,9 @@ import HTMLTemplate from "./LineChart.html.js";
 import CSSTemplate from "./LineChart.css.js";
 import type Renderer from "../renderers/Renderer.js";
 import LineChartState from "../states/LineChartState.js";
-import type Polyline from "../utils/Polyline.js";
+import type Polyline from "../model/Polyline.js";
 import LineChartRenderer from "../renderers/LineChartRenderer.js";
-import type Rectangle from "../utils/Rectangle.js";
+import type Rectangle from "../model/Rectangle.js";
 
 const TAG_NAME = "line-chart";
 
